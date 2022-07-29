@@ -55,13 +55,10 @@ func (v *ValidatorEndpoint) GetCommitteeSyncDuties(epoch uint64, indexes []strin
 	return out, err
 }
 
-func (v *ValidatorEndpoint) GetBlock(slot uint64, randao []byte) (*consensus.BeaconBlock, error) {
-	buf := "0x" + hex.EncodeToString(randao)
-
-	var out *consensus.BeaconBlock
+func (v *ValidatorEndpoint) GetBlock(out consensus.BeaconBlock, slot uint64, randao [96]byte) error {
+	buf := "0x" + hex.EncodeToString(randao[:])
 	err := v.c.Get(fmt.Sprintf("/eth/v1/validator/blocks/%d?randao_reveal=%s", slot, buf), &out)
-
-	return out, err
+	return err
 }
 
 func (v *ValidatorEndpoint) RequestAttestationData(slot uint64, committeeIndex uint64) (*consensus.AttestationData, error) {
@@ -70,7 +67,7 @@ func (v *ValidatorEndpoint) RequestAttestationData(slot uint64, committeeIndex u
 	return out, err
 }
 
-func (v *ValidatorEndpoint) AggregateAttestation(slot uint64, root []byte) (*consensus.Attestation, error) {
+func (v *ValidatorEndpoint) AggregateAttestation(slot uint64, root [32]byte) (*consensus.Attestation, error) {
 	var out *consensus.Attestation
 	err := v.c.Get(fmt.Sprintf("/eth/v1/validator/aggregate_attestation?slot=%d&attestation_data_root=0x%s", slot, hex.EncodeToString(root[:])), &out)
 	return out, err
@@ -82,7 +79,7 @@ func (v *ValidatorEndpoint) PublishAggregateAndProof(data []*consensus.SignedAgg
 }
 
 // produces a sync committee contribution
-func (v *ValidatorEndpoint) SyncCommitteeContribution(slot uint64, subCommitteeIndex uint64, root []byte) (*consensus.SyncCommitteeContribution, error) {
+func (v *ValidatorEndpoint) SyncCommitteeContribution(slot uint64, subCommitteeIndex uint64, root [32]byte) (*consensus.SyncCommitteeContribution, error) {
 	var out *consensus.SyncCommitteeContribution
 	err := v.c.Get(fmt.Sprintf("/eth/v1/validator/sync_committee_contribution?slot=%d&subcommittee_index=%d&beacon_block_root=0x%s", slot, subCommitteeIndex, hex.EncodeToString(root[:])), &out)
 	return out, err

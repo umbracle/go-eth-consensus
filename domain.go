@@ -24,7 +24,17 @@ func (d *Domain) UnmarshalText(data []byte) error {
 	return nil
 }
 
-func ComputeDomain(domain Domain, forkVersion [4]byte, genesisValidatorsRoot Root) ([]byte, error) {
+func ToBytes96(b []byte) (res [96]byte) {
+	copy(res[:], b)
+	return
+}
+
+func ToBytes32(b []byte) (res [32]byte) {
+	copy(res[:], b)
+	return
+}
+
+func ComputeDomain(domain Domain, forkVersion [4]byte, genesisValidatorsRoot Root) ([32]byte, error) {
 	// compute_fork_data_root
 	// this returns the 32byte fork data root for the ``current_version`` and ``genesis_validators_root``.
 	// This is used primarily in signature domains to avoid collisions across forks/chains.
@@ -34,8 +44,7 @@ func ComputeDomain(domain Domain, forkVersion [4]byte, genesisValidatorsRoot Roo
 	}
 	forkRoot, err := forkData.HashTreeRoot()
 	if err != nil {
-		return nil, err
+		return [32]byte{}, err
 	}
-
-	return append(domain[:], forkRoot[:28]...), nil
+	return ToBytes32(append(domain[:], forkRoot[:28]...)), nil
 }

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	consensus "github.com/umbracle/go-eth-consensus"
 )
 
 func TestBeaconEndpoint(t *testing.T) {
@@ -15,12 +16,17 @@ func TestBeaconEndpoint(t *testing.T) {
 	})
 
 	t.Run("SubmitCommitteeDuties", func(t *testing.T) {
-		err := n.SubmitCommitteeDuties([]*SyncCommitteeMessage{})
+		err := n.SubmitCommitteeDuties([]*consensus.SyncCommitteeMessage{})
 		assert.NoError(t, err)
 	})
 
 	t.Run("GetValidatorByPubKey", func(t *testing.T) {
 		_, err := n.GetValidatorByPubKey("0x1")
+		assert.NoError(t, err)
+	})
+
+	t.Run("PublishAttestations", func(t *testing.T) {
+		err := n.PublishAttestations([]*consensus.Attestation{})
 		assert.NoError(t, err)
 	})
 

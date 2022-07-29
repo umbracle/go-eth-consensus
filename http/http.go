@@ -5,17 +5,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
 // https://ethereum.github.io/beacon-APIs/#/
 
 type Client struct {
-	url string
+	url    string
+	logger *log.Logger
 }
 
 func New(url string) *Client {
-	return &Client{url: url}
+	return &Client{url: url, logger: log.New(ioutil.Discard, "", 0)}
+}
+
+func (c *Client) SetLogger(logger *log.Logger) {
+	c.logger = logger
 }
 
 func (c *Client) Post(path string, input interface{}, out interface{}) error {
@@ -62,6 +68,8 @@ func (c *Client) Get(path string, out interface{}) error {
 	}
 	defer resp.Body.Close()
 
+	c.logger.Printf("[TRACE] Get request: path, %s", path)
+
 	if err := c.decodeResp(resp, out); err != nil {
 		return err
 	}
@@ -73,6 +81,8 @@ func (c *Client) decodeResp(resp *http.Response, out interface{}) error {
 	if err != nil {
 		return err
 	}
+
+	c.logger.Printf("[TRACE] Http response: data, %s", string(data))
 
 	var output struct {
 		Data json.RawMessage `json:"data,omitempty"`
