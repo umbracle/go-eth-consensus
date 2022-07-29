@@ -1,5 +1,9 @@
 package consensus
 
+type Root [32]byte
+
+type Signature [96]byte
+
 type AggregateAndProof struct {
 	Index          uint64       `json:"aggregator_index"`
 	Aggregate      *Attestation `json:"aggregate"`
@@ -105,19 +109,6 @@ type AttesterSlashing struct {
 	Attestation2 *IndexedAttestation `json:"attestation_2"`
 }
 
-type BeaconBlock struct {
-	Slot          uint64                 `json:"slot"`
-	ProposerIndex uint64                 `json:"proposer_index"`
-	ParentRoot    Root                   `json:"parent_root" ssz-size:"32"`
-	StateRoot     Root                   `json:"state_root" ssz-size:"32"`
-	Body          *BeaconBlockBodyAltair `json:"body"`
-}
-
-type SignedBeaconBlock struct {
-	Block     *BeaconBlock `json:"message"`
-	Signature Signature    `json:"signature" ssz-size:"96"`
-}
-
 type Transfer struct {
 	Sender    uint64    `json:"sender"`
 	Recipient uint64    `json:"recipient"`
@@ -128,7 +119,20 @@ type Transfer struct {
 	Signature Signature `json:"signature" ssz-size:"96"`
 }
 
-type BeaconBlockBody struct {
+type SignedBeaconBlockPhase0 struct {
+	Block     *BeaconBlockPhase0 `json:"message"`
+	Signature Signature          `json:"signature" ssz-size:"96"`
+}
+
+type BeaconBlockPhase0 struct {
+	Slot          uint64                 `json:"slot"`
+	ProposerIndex uint64                 `json:"proposer_index"`
+	ParentRoot    Root                   `json:"parent_root" ssz-size:"32"`
+	StateRoot     Root                   `json:"state_root" ssz-size:"32"`
+	Body          *BeaconBlockBodyPhase0 `json:"body"`
+}
+
+type BeaconBlockBodyPhase0 struct {
 	RandaoReveal      Signature              `json:"randao_reveal" ssz-size:"96"`
 	Eth1Data          *Eth1Data              `json:"eth1_data"`
 	Graffiti          [32]byte               `json:"graffiti" ssz-size:"32"`
@@ -200,6 +204,19 @@ type SyncCommittee struct {
 }
 
 // bellatrix
+
+type SignedBeaconBlockBellatrix struct {
+	Block     *BeaconBlockBellatrix `json:"message"`
+	Signature Signature             `json:"signature" ssz-size:"96"`
+}
+
+type BeaconBlockBellatrix struct {
+	Slot          uint64                    `json:"slot"`
+	ProposerIndex uint64                    `json:"proposer_index"`
+	ParentRoot    Root                      `json:"parent_root" ssz-size:"32"`
+	StateRoot     Root                      `json:"state_root" ssz-size:"32"`
+	Body          *BeaconBlockBodyBellatrix `json:"body"`
+}
 
 type BeaconBlockBodyBellatrix struct {
 	RandaoReveal      Signature              `json:"randao_reveal" ssz-size:"96"`

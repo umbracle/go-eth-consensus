@@ -13,9 +13,9 @@ func (c *Client) Beacon() *BeaconEndpoint {
 }
 
 type Genesis struct {
-	Time uint64 `json:"genesis_time"`
-	Root []byte `json:"genesis_validators_root"`
-	Fork string `json:"genesis_fork_version"`
+	Time uint64   `json:"genesis_time"`
+	Root [32]byte `json:"genesis_validators_root"`
+	Fork string   `json:"genesis_fork_version"`
 }
 
 func (b *BeaconEndpoint) Genesis() (*Genesis, error) {
@@ -24,14 +24,7 @@ func (b *BeaconEndpoint) Genesis() (*Genesis, error) {
 	return &out, err
 }
 
-type SyncCommitteeMessage struct {
-	Slot           uint64 `json:"slot"`
-	BlockRoot      []byte `json:"beacon_block_root"`
-	ValidatorIndex uint64 `json:"validator_index"`
-	Signature      []byte `json:"signature"`
-}
-
-func (b *BeaconEndpoint) SubmitCommitteeDuties(duties []*SyncCommitteeMessage) error {
+func (b *BeaconEndpoint) SubmitCommitteeDuties(duties []*consensus.SyncCommitteeMessage) error {
 	err := b.c.Post("/eth/v1/beacon/pool/sync_committees", duties, nil)
 	return err
 }
@@ -57,7 +50,7 @@ func (b *BeaconEndpoint) GetValidatorByPubKey(pub string) (*Validator, error) {
 	return out, err
 }
 
-func (b *BeaconEndpoint) PublishSignedBlock(block *consensus.SignedBeaconBlock) error {
+func (b *BeaconEndpoint) PublishSignedBlock(block consensus.SignedBeaconBlock) error {
 	err := b.c.Post("/eth/v1/beacon/blocks", block, nil)
 	return err
 }
@@ -67,9 +60,9 @@ func (b *BeaconEndpoint) PublishAttestations(data []*consensus.Attestation) erro
 	return err
 }
 
-func (b *BeaconEndpoint) GetHeadBlockRoot() ([]byte, error) {
+func (b *BeaconEndpoint) GetHeadBlockRoot() ([32]byte, error) {
 	var data struct {
-		Root []byte
+		Root [32]byte
 	}
 	err := b.c.Get("/eth/v1/beacon/blocks/head/root", &data)
 	return data.Root, err

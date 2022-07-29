@@ -1,11 +1,25 @@
 package consensus
 
 type Spec struct {
-	GenesisSlot  uint64 `json:"GENESIS_SLOT"`  // GenesisSlot represents the first canonical slot number of the beacon chain.
-	GenesisEpoch uint64 `json:"GENESIS_EPOCH"` // GenesisEpoch represents the first canonical epoch number of the beacon chain.
+	// GenesisSlot represents the first canonical slot number of the beacon chain.
+	GenesisSlot uint64 `json:"GENESIS_SLOT"`
 
-	// Fork values
-	GenesisForkVersion Domain `json:"GENESIS_FORK_VERSION"` // GenesisForkVersion is used to track fork version between state transitions.
+	// GenesisEpoch represents the first canonical epoch number of the beacon chain.
+	GenesisEpoch uint64 `json:"GENESIS_EPOCH"`
+
+	// SecondsPerSlot is how many seconds are in a single slot.
+	SecondsPerSlot uint64 `json:"SECONDS_PER_SLOT"`
+
+	// SlotsPerEpoch is the number of slots in an epoch.
+	SlotsPerEpoch uint64 `json:"SLOTS_PER_EPOCH"`
+
+	SyncCommitteeSize uint64 `json:"SYNC_COMMITTEE_SIZE"`
+
+	// TargetAggregatorsPerCommittee defines the number of aggregators inside one committee.
+	TargetAggregatorsPerCommittee uint64 `json:"TARGET_AGGREGATORS_PER_COMMITTEE"`
+
+	// GenesisForkVersion is used to track fork version between state transitions.
+	GenesisForkVersion Domain `json:"GENESIS_FORK_VERSION"`
 
 	AltairForkVersion Domain `json:"ALTAIR_FORK_VERSION"`
 	AltairForkEpoch   uint64 `json:"ALTAIR_FORK_EPOCH"`

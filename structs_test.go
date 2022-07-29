@@ -43,14 +43,18 @@ var codecs = map[string]testCallback{
 	"Attestation":       func(f fork) codec { return new(Attestation) },
 	"AttesterSlashing":  func(f fork) codec { return new(AttesterSlashing) },
 	"BeaconBlock": func(f fork) codec {
-		if f == altairFork {
+		if f == phase0Fork {
+			return new(BeaconBlockPhase0)
+		} else if f == altairFork {
 			return new(BeaconBlockAltair)
+		} else if f == bellatrixFork {
+			return new(BeaconBlockBellatrix)
 		}
 		return nil
 	},
 	"BeaconBlockBody": func(f fork) codec {
 		if f == phase0Fork {
-			return new(BeaconBlockBody)
+			return new(BeaconBlockBodyPhase0)
 		} else if f == altairFork {
 			return new(BeaconBlockBodyAltair)
 		} else if f == bellatrixFork {
@@ -68,8 +72,12 @@ var codecs = map[string]testCallback{
 	"PendingAttestation": func(f fork) codec { return new(PendingAttestation) },
 	"ProposerSlashing":   func(f fork) codec { return new(ProposerSlashing) },
 	"SignedBeaconBlock": func(f fork) codec {
-		if f == altairFork {
+		if f == phase0Fork {
+			return new(SignedBeaconBlockPhase0)
+		} else if f == altairFork {
 			return new(SignedBeaconBlockAltair)
+		} else if f == bellatrixFork {
+			return new(SignedBeaconBlockBellatrix)
 		}
 		return nil
 	},

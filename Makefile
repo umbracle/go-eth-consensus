@@ -1,6 +1,6 @@
 
 sszgen:
-	sszgen --path structs.go --include ./common.go
+	sszgen --path structs.go --exclude-objs Root,Signature
 
 get-spec-tests:
 	./scripts/download-spec-tests.sh v1.1.10

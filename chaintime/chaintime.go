@@ -31,7 +31,7 @@ func (c *Chaintime) newTime(seconds uint64) time.Time {
 }
 
 func (c *Chaintime) CurrentEpoch() Epoch {
-	numEpoch := uint64(now().Sub(c.Genesis).Seconds()) / c.SecondsPerSlot * c.SlotsPerEpoch
+	numEpoch := uint64(now().Sub(c.Genesis).Seconds()) / (c.SecondsPerSlot * c.SlotsPerEpoch)
 	return c.Epoch(numEpoch)
 }
 
@@ -60,6 +60,10 @@ func (c *Chaintime) Epoch(epoch uint64) Epoch {
 type Epoch struct {
 	Number uint64
 	Time   time.Time
+}
+
+func (e Epoch) Until() time.Duration {
+	return e.Time.Sub(now())
 }
 
 func (e Epoch) C() *time.Timer {
