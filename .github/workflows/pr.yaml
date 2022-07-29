@@ -17,4 +17,4 @@ jobs:
       - name: Start openapi mock
         run: ./scripts/openapi-mock.sh
       - name: Unit tests
-        run: go test -v ./...
+        run: go test -v ./... -timeout 10m
