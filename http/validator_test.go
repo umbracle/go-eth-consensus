@@ -47,4 +47,19 @@ func TestValidatorEndpoint(t *testing.T) {
 		_, err := n.SyncCommitteeContribution(1, 1, [32]byte{})
 		assert.NoError(t, err)
 	})
+
+	t.Run("BeaconCommitteeSubscriptions", func(t *testing.T) {
+		err := n.BeaconCommitteeSubscriptions([]*BeaconCommitteeSubscription{{}})
+		assert.NoError(t, err)
+	})
+
+	t.Run("SyncCommitteeSubscriptions", func(t *testing.T) {
+		err := n.SyncCommitteeSubscriptions([]*SyncCommitteeSubscription{{}})
+		assert.NoError(t, err)
+	})
+
+	t.Run("PrepareBeaconProposer", func(t *testing.T) {
+		err := n.PrepareBeaconProposer([]*ProposalPreparation{{}})
+		assert.NoError(t, err)
+	})
 }

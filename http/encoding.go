@@ -83,8 +83,11 @@ func marshalImpl(v reflect.Value) (interface{}, error) {
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		return strconv.Itoa(int(v.Uint())), nil
 
+	case reflect.Bool:
+		return v.Bool(), nil
+
 	default:
-		panic("BUG")
+		panic(fmt.Sprintf("BUG: Cannot marshal type %s", v.Kind()))
 	}
 }
 
