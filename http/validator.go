@@ -89,3 +89,37 @@ func (v *ValidatorEndpoint) SubmitSignedContributionAndProof(signedContribution 
 	err := v.c.Post("/eth/v1/validator/contribution_and_proofs", signedContribution, nil)
 	return err
 }
+
+type BeaconCommitteeSubscription struct {
+	ValidatorIndex   uint64 `json:"validator_index"`
+	Slot             uint64 `json:"slot"`
+	CommitteeIndex   uint64 `json:"committee_index"`
+	CommitteesAtSlot uint64 `json:"committee_at_slot"`
+	IsAggregator     bool   `json:"is_aggregator"`
+}
+
+func (v *ValidatorEndpoint) BeaconCommitteeSubscriptions(subs []*BeaconCommitteeSubscription) error {
+	err := v.c.Post("/eth/v1/validator/beacon_committee_subscriptions", subs, nil)
+	return err
+}
+
+type SyncCommitteeSubscription struct {
+	ValidatorIndex       uint64   `json:"validator_index"`
+	SyncCommitteeIndices []uint64 `json:"sync_committee_indices"`
+	UntilEpoch           uint64   `json:"until_epoch"`
+}
+
+func (v *ValidatorEndpoint) SyncCommitteeSubscriptions(subs []*SyncCommitteeSubscription) error {
+	err := v.c.Post("/eth/v1/validator/sync_committee_subscriptions", subs, nil)
+	return err
+}
+
+type ProposalPreparation struct {
+	ValidatorIndex uint64
+	FeeRecipient   [20]byte
+}
+
+func (v *ValidatorEndpoint) PrepareBeaconProposer(input []*ProposalPreparation) error {
+	err := v.c.Post("/eth/v1/validator/prepare_beacon_proposer", input, nil)
+	return err
+}
