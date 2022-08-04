@@ -231,6 +231,32 @@ type BeaconBlockBodyBellatrix struct {
 	ExecutionPayload  *ExecutionPayload      `json:"execution_payload"`
 }
 
+type SignedBlindedBeaconBlock struct {
+	Block     *BlindedBeaconBlock `json:"message"`
+	Signature Signature           `json:"signature" ssz-size:"96"`
+}
+
+type BlindedBeaconBlock struct {
+	Slot          uint64                  `json:"slot"`
+	ProposerIndex uint64                  `json:"proposer_index"`
+	ParentRoot    Root                    `json:"parent_root" ssz-size:"32"`
+	StateRoot     Root                    `json:"state_root" ssz-size:"32"`
+	Body          *BlindedBeaconBlockBody `json:"body"`
+}
+
+type BlindedBeaconBlockBody struct {
+	RandaoReveal           Signature               `json:"randao_reveal" ssz-size:"96"`
+	Eth1Data               *Eth1Data               `json:"eth1_data"`
+	Graffiti               [32]byte                `json:"graffiti" ssz-size:"32"`
+	ProposerSlashings      []*ProposerSlashing     `json:"proposer_slashings" ssz-max:"16"`
+	AttesterSlashings      []*AttesterSlashing     `json:"attester_slashings" ssz-max:"2"`
+	Attestations           []*Attestation          `json:"attestations" ssz-max:"128"`
+	Deposits               []*Deposit              `json:"deposits" ssz-max:"16"`
+	VoluntaryExits         []*SignedVoluntaryExit  `json:"voluntary_exits" ssz-max:"16"`
+	SyncAggregate          *SyncAggregate          `json:"sync_aggregate"`
+	ExecutionPayloadHeader *ExecutionPayloadHeader `json:"execution_payload_header"`
+}
+
 type ExecutionPayload struct {
 	ParentHash    [32]byte  `ssz-size:"32" json:"parent_hash"`
 	FeeRecipient  [20]byte  `ssz-size:"20" json:"fee_recipient"`
