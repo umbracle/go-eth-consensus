@@ -354,7 +354,7 @@ type SyncCommitteeContribution struct {
 	Slot              uint64    `json:"slot"`
 	BeaconBlockRoot   Root      `json:"beacon_block_root" ssz-size:"32"`
 	SubcommitteeIndex uint64    `json:"subcommittee_index"`
-	AggregationBits   [16]byte  `json:"aggregation_bits" ssz-size:"16"` // bitvector
+	AggregationBits   []byte    `json:"aggregation_bits" ssz-size:"16"` // bitvector
 	Signature         Signature `json:"signature" ssz-size:"96"`
 }
 
