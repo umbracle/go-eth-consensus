@@ -37,24 +37,6 @@ func (c *Client) Post(path string, input interface{}, out interface{}) error {
 	}
 	defer resp.Body.Close()
 
-	if out == nil {
-		// nothing is expected, make sure its a 200 resp code
-		data, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return err
-		}
-		if string(data) == `{"data":null}` {
-			return nil
-		}
-		if string(data) == "null" {
-			return nil
-		}
-		if string(data) == "" {
-			return nil
-		}
-		// its a json that represnets an error, just reutrn it
-		return fmt.Errorf("json failed to decode post message: '%s'", string(data))
-	}
 	if err := c.decodeResp(resp, out); err != nil {
 		return err
 	}
@@ -76,13 +58,53 @@ func (c *Client) Get(path string, out interface{}) error {
 	return nil
 }
 
+var (
+	ErrorBadRequest          = fmt.Errorf("bad request (400)")
+	ErrorNotFound            = fmt.Errorf("not found (404)")
+	ErrorInternalServerError = fmt.Errorf("internal server error (500)")
+	ErrorServiceUnavailable  = fmt.Errorf("service unavailable (503)")
+)
+
 func (c *Client) decodeResp(resp *http.Response, out interface{}) error {
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
 
+	errorFn := func(code error) error {
+		return fmt.Errorf("status code != 200: %s %w", string(data), code)
+	}
+
+	switch resp.StatusCode {
+	case http.StatusOK:
+		break
+	case http.StatusBadRequest: // 400
+		return errorFn(ErrorBadRequest)
+	case http.StatusNotFound: // 404
+		return errorFn(ErrorNotFound)
+	case http.StatusInternalServerError: // 500
+		return errorFn(ErrorInternalServerError)
+	case http.StatusServiceUnavailable: // 503
+		return errorFn(ErrorServiceUnavailable)
+	default:
+		return errorFn(fmt.Errorf("%d", resp.StatusCode))
+	}
+
 	c.logger.Printf("[TRACE] Http response: data, %s", string(data))
+
+	if resp.Request.Method == http.MethodPost && out == nil {
+		// post methods that expects no output
+		if string(data) == `{"data":null}` {
+			return nil
+		}
+		if string(data) == "null" {
+			return nil
+		}
+		if string(data) == "" {
+			return nil
+		}
+		return fmt.Errorf("json failed to decode post message: '%s'", string(data))
+	}
 
 	var output struct {
 		Data json.RawMessage `json:"data,omitempty"`
