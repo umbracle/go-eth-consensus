@@ -1,7 +1,6 @@
 package http
 
 import (
-	"log"
 	"net/http"
 	"testing"
 	"time"
@@ -74,7 +73,7 @@ func newMockHttpServer(t *testing.T, handler func(m *http.ServeMux)) string {
 	}
 
 	go func() {
-		log.Fatal(s.ListenAndServe())
+		s.ListenAndServe()
 	}()
 	time.Sleep(500 * time.Millisecond)
 
