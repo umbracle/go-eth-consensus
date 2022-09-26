@@ -100,6 +100,16 @@ var codecs = map[string]testCallback{
 	"PowBlock":                    func(f fork) codec { return new(PowBlock) },
 	"ExecutionPayload":            func(f fork) codec { return new(ExecutionPayload) },
 	"ExecutionPayloadHeader":      func(f fork) codec { return new(ExecutionPayloadHeader) },
+	"BeaconState": func(f fork) codec {
+		if f == phase0Fork {
+			return new(BeaconStatePhase0)
+		} else if f == altairFork {
+			return new(BeaconStateAltair)
+		} else if f == bellatrixFork {
+			return new(BeaconStateBellatrix)
+		}
+		return nil
+	},
 }
 
 func testFork(t *testing.T, fork fork) {

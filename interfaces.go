@@ -25,3 +25,16 @@ func (s *BeaconBlockPhase0) isBeaconBlock() {
 
 func (s *BeaconBlockBellatrix) isBeaconBlock() {
 }
+
+type BeaconState interface {
+	isBeaconState()
+}
+
+func (s *BeaconStatePhase0) isBeaconState() {
+}
+
+func (s *BeaconStateAltair) isBeaconState() {
+}
+
+func (s *BeaconStateBellatrix) isBeaconState() {
+}
