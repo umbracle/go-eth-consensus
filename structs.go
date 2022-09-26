@@ -310,6 +310,32 @@ type BeaconBlockBodyBellatrix struct {
 	ExecutionPayload  *ExecutionPayload      `json:"execution_payload"`
 }
 
+type SignedBlindedBeaconBlock struct {
+	Block     *BlindedBeaconBlock `json:"message"`
+	Signature Signature           `json:"signature" ssz-size:"96"`
+}
+
+type BlindedBeaconBlock struct {
+	Slot          uint64                  `json:"slot"`
+	ProposerIndex uint64                  `json:"proposer_index"`
+	ParentRoot    Root                    `json:"parent_root" ssz-size:"32"`
+	StateRoot     Root                    `json:"state_root" ssz-size:"32"`
+	Body          *BlindedBeaconBlockBody `json:"body"`
+}
+
+type BlindedBeaconBlockBody struct {
+	RandaoReveal           Signature               `json:"randao_reveal" ssz-size:"96"`
+	Eth1Data               *Eth1Data               `json:"eth1_data"`
+	Graffiti               [32]byte                `json:"graffiti" ssz-size:"32"`
+	ProposerSlashings      []*ProposerSlashing     `json:"proposer_slashings" ssz-max:"16"`
+	AttesterSlashings      []*AttesterSlashing     `json:"attester_slashings" ssz-max:"2"`
+	Attestations           []*Attestation          `json:"attestations" ssz-max:"128"`
+	Deposits               []*Deposit              `json:"deposits" ssz-max:"16"`
+	VoluntaryExits         []*SignedVoluntaryExit  `json:"voluntary_exits" ssz-max:"16"`
+	SyncAggregate          *SyncAggregate          `json:"sync_aggregate"`
+	ExecutionPayloadHeader *ExecutionPayloadHeader `json:"execution_payload_header"`
+}
+
 type ExecutionPayload struct {
 	ParentHash    [32]byte  `ssz-size:"32" json:"parent_hash"`
 	FeeRecipient  [20]byte  `ssz-size:"20" json:"fee_recipient"`
@@ -327,6 +353,8 @@ type ExecutionPayload struct {
 	Transactions  [][]byte  `ssz-max:"1048576,1073741824" ssz-size:"?,?" json:"transactions"`
 }
 
+type Uint256 [32]byte
+
 type ExecutionPayloadHeader struct {
 	ParentHash       [32]byte  `json:"parent_hash" ssz-size:"32"`
 	FeeRecipient     [20]byte  `json:"fee_recipient" ssz-size:"20"`
@@ -339,7 +367,7 @@ type ExecutionPayloadHeader struct {
 	GasUsed          uint64    `json:"gas_used"`
 	Timestamp        uint64    `json:"timestamp"`
 	ExtraData        []byte    `json:"extra_data" ssz-max:"32"`
-	BaseFeePerGas    [32]byte  `json:"base_fee_per_gas" ssz-size:"32"`
+	BaseFeePerGas    Uint256   `json:"base_fee_per_gas" ssz-size:"32"`
 	BlockHash        [32]byte  `json:"block_hash" ssz-size:"32"`
 	TransactionsRoot [32]byte  `json:"transactions_root" ssz-size:"32"`
 }

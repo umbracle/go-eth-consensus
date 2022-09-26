@@ -1,6 +1,7 @@
 package http
 
 import (
+	"encoding"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -29,6 +30,10 @@ func Marshal(obj interface{}) ([]byte, error) {
 }
 
 func marshalImpl(v reflect.Value) (interface{}, error) {
+	if v.Kind() == reflect.Ptr && v.IsNil() {
+		// create the element if nil
+		v = reflect.New(v.Type().Elem())
+	}
 	typ := v.Type()
 	if isByteArray(typ) {
 		// [n]byte
@@ -37,6 +42,17 @@ func marshalImpl(v reflect.Value) (interface{}, error) {
 	if isByteSlice(typ) {
 		// []byte
 		return "0x" + hex.EncodeToString(v.Bytes()), nil
+	}
+
+	// marshal with encoding.TextUnmarshaler
+	result := v.Interface()
+	marshaller, ok := result.(encoding.TextMarshaler)
+	if ok {
+		res, err := marshaller.MarshalText()
+		if err != nil {
+			return nil, err
+		}
+		return res, nil
 	}
 
 	switch v.Kind() {
@@ -139,10 +155,21 @@ func customWeb3Hook(f reflect.Type, t reflect.Type, data interface{}) (interface
 		return data, nil
 	}
 
+	// encode with text unmarshaller
+	result := reflect.New(t).Interface()
+	unmarshaller, ok := result.(encoding.TextUnmarshaler)
+	if ok {
+		if err := unmarshaller.UnmarshalText([]byte(data.(string))); err != nil {
+			return nil, err
+		}
+		return result, nil
+	}
+
+	// []byte
 	if isByteArray(t) {
 		raw := data.(string)
 		if !strings.HasPrefix(raw, "0x") {
-			return nil, fmt.Errorf("0x prefix not found")
+			return nil, fmt.Errorf("0x prefix not found for []byte")
 		}
 		elem, err := hex.DecodeString(raw[2:])
 		if err != nil {
@@ -159,11 +186,11 @@ func customWeb3Hook(f reflect.Type, t reflect.Type, data interface{}) (interface
 		return v.Interface(), nil
 	}
 
+	// [n]byte
 	if isByteSlice(t) {
-		// []byte
 		raw := data.(string)
 		if !strings.HasPrefix(raw, "0x") {
-			return nil, fmt.Errorf("0x prefix not found")
+			return nil, fmt.Errorf("0x prefix not found for [n]byte")
 		}
 		elem, err := hex.DecodeString(raw[2:])
 		if err != nil {
