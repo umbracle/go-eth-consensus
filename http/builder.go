@@ -26,14 +26,14 @@ type SignedValidatorRegistration struct {
 	Signature [96]byte                  `json:"signature" ssz-size:"96"`
 }
 
-func (b *BuilderEndpoint) RegisterValidator(msg *SignedValidatorRegistration) error {
+func (b *BuilderEndpoint) RegisterValidator(msg []*SignedValidatorRegistration) error {
 	err := b.c.Post("/eth/v1/builder/validators", msg, nil)
 	return err
 }
 
 type BuilderBid struct {
 	Header *consensus.ExecutionPayloadHeader `json:"header"`
-	Value  [32]byte                          `json:"value" ssz-size:"32"`
+	Value  consensus.Uint256                 `json:"value" ssz-size:"32"`
 	Pubkey [48]byte                          `json:"pubkey" ssz-size:"48"`
 }
 
@@ -48,7 +48,8 @@ func (b *BuilderEndpoint) GetExecutionPayload(slot uint64, parentHash [32]byte, 
 	return out, err
 }
 
-func (b *BuilderEndpoint) SubmitBlindedBlock(msg *consensus.SignedBlindedBeaconBlock) error {
-	err := b.c.Post("/eth/v1/builder/blinded_blocks", msg, nil)
-	return err
+func (b *BuilderEndpoint) SubmitBlindedBlock(msg *consensus.SignedBlindedBeaconBlock) (*consensus.ExecutionPayloadHeader, error) {
+	var out *consensus.ExecutionPayloadHeader
+	err := b.c.Post("/eth/v1/builder/blinded_blocks", msg, &out)
+	return out, err
 }

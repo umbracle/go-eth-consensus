@@ -1,6 +1,6 @@
 
 sszgen:
-	sszgen --path structs.go --exclude-objs Root,Signature
+	sszgen --path structs.go --exclude-objs Root,Signature,Uint256
 	sszgen --path ./http/builder.go --objs RegisterValidatorRequest --output ./http/builder_encoding.go
 
 get-spec-tests:

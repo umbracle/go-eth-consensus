@@ -53,7 +53,7 @@ func (c *Client) Post(path string, input interface{}, out interface{}) error {
 			return nil
 		}
 		// its a json that represnets an error, just reutrn it
-		return fmt.Errorf("json failed to decode post message: '%s'", string(data))
+		return fmt.Errorf("json failed to decode empty post message: '%s'", string(data))
 	}
 	if err := c.decodeResp(resp, out); err != nil {
 		return err
