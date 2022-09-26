@@ -43,6 +43,19 @@ func (c *Client) Post(path string, input interface{}, out interface{}) error {
 	return nil
 }
 
+func (c *Client) Status(path string) (bool, error) {
+	resp, err := http.Get(c.url + path)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 200 {
+		return true, nil
+	}
+	return false, fmt.Errorf("status != 200 (%d)", resp.StatusCode)
+}
+
 func (c *Client) Get(path string, out interface{}) error {
 	resp, err := http.Get(c.url + path)
 	if err != nil {

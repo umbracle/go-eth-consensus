@@ -28,4 +28,10 @@ func TestBuilderEndpoint(t *testing.T) {
 		_, err := n.SubmitBlindedBlock(obj)
 		assert.NoError(t, err)
 	})
+
+	t.Run("Status", func(t *testing.T) {
+		ok, err := n.Status()
+		assert.NoError(t, err)
+		assert.True(t, ok)
+	})
 }

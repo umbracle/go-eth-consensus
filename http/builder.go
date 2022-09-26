@@ -53,3 +53,7 @@ func (b *BuilderEndpoint) SubmitBlindedBlock(msg *consensus.SignedBlindedBeaconB
 	err := b.c.Post("/eth/v1/builder/blinded_blocks", msg, &out)
 	return out, err
 }
+
+func (b *BuilderEndpoint) Status() (bool, error) {
+	return b.c.Status("/eth/v1/builder/status")
+}
