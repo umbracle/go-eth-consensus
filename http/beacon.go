@@ -83,6 +83,32 @@ const (
 	Finalized plainStateId = "finalized"
 )
 
+func (b *BeaconEndpoint) GetRoot(id StateId) ([32]byte, error) {
+	var out struct {
+		Root [32]byte
+	}
+	err := b.c.Get("/eth/v1/beacon/states/"+id.StateID()+"/root", &out)
+	return out.Root, err
+}
+
+func (b *BeaconEndpoint) GetFork(id StateId) (*consensus.Fork, error) {
+	var out *consensus.Fork
+	err := b.c.Get("/eth/v1/beacon/states/"+id.StateID()+"/fork", &out)
+	return out, err
+}
+
+type FinalizedCheckpoints struct {
+	PreviousJustifiedCheckpoint *consensus.Checkpoint `json:"previous_justified"`
+	CurrentJustifiedCheckpoint  *consensus.Checkpoint `json:"current_justified"`
+	FinalizedCheckpoint         *consensus.Checkpoint `json:"finalized"`
+}
+
+func (b *BeaconEndpoint) GetFinalityCheckpoints(id StateId) (*FinalizedCheckpoints, error) {
+	var out *FinalizedCheckpoints
+	err := b.c.Get("/eth/v1/beacon/states/"+id.StateID()+"/finality_checkpoints", &out)
+	return out, err
+}
+
 func (b *BeaconEndpoint) GetValidators(id StateId) ([]*Validator, error) {
 	var out []*Validator
 	err := b.c.Get("/eth/v1/beacon/states/"+id.StateID()+"/validators", &out)

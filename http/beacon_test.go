@@ -20,6 +20,21 @@ func TestBeaconEndpoint(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
+	t.Run("GetRoot", func(t *testing.T) {
+		_, err := n.GetRoot(Finalized)
+		assert.NoError(t, err)
+	})
+
+	t.Run("GetFork", func(t *testing.T) {
+		_, err := n.GetFork(Finalized)
+		assert.NoError(t, err)
+	})
+
+	t.Run("GetFinalityCheckpoints", func(t *testing.T) {
+		_, err := n.GetFinalityCheckpoints(Finalized)
+		assert.NoError(t, err)
+	})
+
 	t.Run("GetValidators", func(t *testing.T) {
 		_, err := n.GetValidators(Finalized)
 		assert.NoError(t, err)

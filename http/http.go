@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 )
@@ -37,7 +37,7 @@ type Client struct {
 
 func New(url string, opts ...ConfigOption) *Client {
 	config := &Config{
-		logger: log.New(ioutil.Discard, "", 0),
+		logger: log.New(io.Discard, "", 0),
 	}
 	for _, opt := range opts {
 		opt(config)
@@ -76,10 +76,14 @@ func (c *Client) Status(path string) (bool, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == 200 {
+	if resp.StatusCode == http.StatusOK {
 		return true, nil
 	}
-	return false, fmt.Errorf("status != 200 (%d)", resp.StatusCode)
+	errorMsg, ok := httpErrorMapping[resp.StatusCode]
+	if ok {
+		return false, errorMsg
+	}
+	return false, fmt.Errorf("status code != 200: %d", resp.StatusCode)
 }
 
 func (c *Client) Get(path string, out interface{}) error {
@@ -98,35 +102,33 @@ func (c *Client) Get(path string, out interface{}) error {
 }
 
 var (
+	ErrorIncompleteData      = fmt.Errorf("incomplete data (206)")
 	ErrorBadRequest          = fmt.Errorf("bad request (400)")
 	ErrorNotFound            = fmt.Errorf("not found (404)")
 	ErrorInternalServerError = fmt.Errorf("internal server error (500)")
 	ErrorServiceUnavailable  = fmt.Errorf("service unavailable (503)")
 )
 
+var httpErrorMapping = map[int]error{
+	http.StatusPartialContent:      ErrorIncompleteData,
+	http.StatusBadRequest:          ErrorBadRequest,
+	http.StatusNotFound:            ErrorNotFound,
+	http.StatusInternalServerError: ErrorInternalServerError,
+	http.StatusServiceUnavailable:  ErrorServiceUnavailable,
+}
+
 func (c *Client) decodeResp(resp *http.Response, out interface{}) error {
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
 
-	errorFn := func(code error) error {
-		return fmt.Errorf("status code != 200: %s %w", string(data), code)
-	}
-
-	switch resp.StatusCode {
-	case http.StatusOK:
-		break
-	case http.StatusBadRequest: // 400
-		return errorFn(ErrorBadRequest)
-	case http.StatusNotFound: // 404
-		return errorFn(ErrorNotFound)
-	case http.StatusInternalServerError: // 500
-		return errorFn(ErrorInternalServerError)
-	case http.StatusServiceUnavailable: // 503
-		return errorFn(ErrorServiceUnavailable)
-	default:
-		return errorFn(fmt.Errorf("%d", resp.StatusCode))
+	if resp.StatusCode != http.StatusOK {
+		errorMsg, ok := httpErrorMapping[resp.StatusCode]
+		if ok {
+			return errorMsg
+		}
+		return fmt.Errorf("status code != 200: %s %d", string(data), resp.StatusCode)
 	}
 
 	c.config.logger.Printf("[TRACE] Http response: data, %s", string(data))

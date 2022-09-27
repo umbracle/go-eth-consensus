@@ -38,4 +38,10 @@ func TestNodeEndpoint(t *testing.T) {
 		_, err := n.Syncing()
 		assert.NoError(t, err)
 	})
+
+	t.Run("Health", func(t *testing.T) {
+		status, err := n.Health()
+		assert.NoError(t, err)
+		assert.True(t, status)
+	})
 }

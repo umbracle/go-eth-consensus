@@ -62,4 +62,12 @@ func TestValidatorEndpoint(t *testing.T) {
 		err := n.PrepareBeaconProposer([]*ProposalPreparation{{}})
 		assert.NoError(t, err)
 	})
+
+	t.Run("RegisterValidator", func(t *testing.T) {
+		obj := []*SignedValidatorRegistration{
+			{Message: &RegisterValidatorRequest{}},
+		}
+		err := n.RegisterValidator(obj)
+		assert.NoError(t, err)
+	})
 }

@@ -57,7 +57,7 @@ func (v *ValidatorEndpoint) GetCommitteeSyncDuties(epoch uint64, indexes []strin
 
 func (v *ValidatorEndpoint) GetBlock(out consensus.BeaconBlock, slot uint64, randao [96]byte) error {
 	buf := "0x" + hex.EncodeToString(randao[:])
-	err := v.c.Get(fmt.Sprintf("/eth/v1/validator/blocks/%d?randao_reveal=%s", slot, buf), &out)
+	err := v.c.Get(fmt.Sprintf("/eth/v2/validator/blocks/%d?randao_reveal=%s", slot, buf), &out)
 	return err
 }
 
@@ -75,18 +75,6 @@ func (v *ValidatorEndpoint) AggregateAttestation(slot uint64, root [32]byte) (*c
 
 func (v *ValidatorEndpoint) PublishAggregateAndProof(data []*consensus.SignedAggregateAndProof) error {
 	err := v.c.Post("/eth/v1/validator/aggregate_and_proofs", data, nil)
-	return err
-}
-
-// produces a sync committee contribution
-func (v *ValidatorEndpoint) SyncCommitteeContribution(slot uint64, subCommitteeIndex uint64, root [32]byte) (*consensus.SyncCommitteeContribution, error) {
-	var out *consensus.SyncCommitteeContribution
-	err := v.c.Get(fmt.Sprintf("/eth/v1/validator/sync_committee_contribution?slot=%d&subcommittee_index=%d&beacon_block_root=0x%s", slot, subCommitteeIndex, hex.EncodeToString(root[:])), &out)
-	return out, err
-}
-
-func (v *ValidatorEndpoint) SubmitSignedContributionAndProof(signedContribution []*consensus.SignedContributionAndProof) error {
-	err := v.c.Post("/eth/v1/validator/contribution_and_proofs", signedContribution, nil)
 	return err
 }
 
@@ -114,6 +102,18 @@ func (v *ValidatorEndpoint) SyncCommitteeSubscriptions(subs []*SyncCommitteeSubs
 	return err
 }
 
+// produces a sync committee contribution
+func (v *ValidatorEndpoint) SyncCommitteeContribution(slot uint64, subCommitteeIndex uint64, root [32]byte) (*consensus.SyncCommitteeContribution, error) {
+	var out *consensus.SyncCommitteeContribution
+	err := v.c.Get(fmt.Sprintf("/eth/v1/validator/sync_committee_contribution?slot=%d&subcommittee_index=%d&beacon_block_root=0x%s", slot, subCommitteeIndex, hex.EncodeToString(root[:])), &out)
+	return out, err
+}
+
+func (v *ValidatorEndpoint) SubmitSignedContributionAndProof(signedContribution []*consensus.SignedContributionAndProof) error {
+	err := v.c.Post("/eth/v1/validator/contribution_and_proofs", signedContribution, nil)
+	return err
+}
+
 type ProposalPreparation struct {
 	ValidatorIndex uint64
 	FeeRecipient   [20]byte
@@ -121,5 +121,22 @@ type ProposalPreparation struct {
 
 func (v *ValidatorEndpoint) PrepareBeaconProposer(input []*ProposalPreparation) error {
 	err := v.c.Post("/eth/v1/validator/prepare_beacon_proposer", input, nil)
+	return err
+}
+
+type RegisterValidatorRequest struct {
+	FeeRecipient [20]byte `json:"fee_recipient" ssz-size:"20"`
+	GasLimit     uint64   `json:"gas_limit,string"`
+	Timestamp    uint64   `json:"timestamp,string"`
+	Pubkey       [48]byte `json:"pubkey" ssz-size:"48"`
+}
+
+type SignedValidatorRegistration struct {
+	Message   *RegisterValidatorRequest `json:"message"`
+	Signature [96]byte                  `json:"signature" ssz-size:"96"`
+}
+
+func (v *ValidatorEndpoint) RegisterValidator(msg []*SignedValidatorRegistration) error {
+	err := v.c.Post("/eth/v1/validator/register_validator", msg, nil)
 	return err
 }

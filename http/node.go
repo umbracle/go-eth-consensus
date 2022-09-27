@@ -82,3 +82,8 @@ func (n *NodeEndpoint) Syncing() (*Syncing, error) {
 	err := n.c.Get("/eth/v1/node/syncing", &out)
 	return &out, err
 }
+
+func (n *NodeEndpoint) Health() (bool, error) {
+	status, err := n.c.Status("/eth/v1/node/health")
+	return status, err
+}
