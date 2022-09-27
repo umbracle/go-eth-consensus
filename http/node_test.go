@@ -7,7 +7,7 @@ import (
 )
 
 func TestNodeEndpoint(t *testing.T) {
-	n := New("http://127.0.0.1:4010").Node()
+	n := New("http://127.0.0.1:4010", WithUntrackedKeys()).Node()
 
 	t.Run("Identity", func(t *testing.T) {
 		_, err := n.Identity()

@@ -11,17 +11,43 @@ import (
 
 // https://ethereum.github.io/beacon-APIs/#/
 
-type Client struct {
-	url    string
-	logger *log.Logger
+type Config struct {
+	logger        *log.Logger
+	untrackedKeys bool
 }
 
-func New(url string) *Client {
-	return &Client{url: url, logger: log.New(ioutil.Discard, "", 0)}
+type ConfigOption func(*Config)
+
+func WithLogger(logger *log.Logger) ConfigOption {
+	return func(c *Config) {
+		c.logger = logger
+	}
+}
+
+func WithUntrackedKeys() ConfigOption {
+	return func(c *Config) {
+		c.untrackedKeys = true
+	}
+}
+
+type Client struct {
+	url    string
+	config *Config
+}
+
+func New(url string, opts ...ConfigOption) *Client {
+	config := &Config{
+		logger: log.New(ioutil.Discard, "", 0),
+	}
+	for _, opt := range opts {
+		opt(config)
+	}
+
+	return &Client{url: url, config: config}
 }
 
 func (c *Client) SetLogger(logger *log.Logger) {
-	c.logger = logger
+	c.config.logger = logger
 }
 
 func (c *Client) Post(path string, input interface{}, out interface{}) error {
@@ -63,7 +89,7 @@ func (c *Client) Get(path string, out interface{}) error {
 	}
 	defer resp.Body.Close()
 
-	c.logger.Printf("[TRACE] Get request: path, %s", path)
+	c.config.logger.Printf("[TRACE] Get request: path, %s", path)
 
 	if err := c.decodeResp(resp, out); err != nil {
 		return err
@@ -103,7 +129,7 @@ func (c *Client) decodeResp(resp *http.Response, out interface{}) error {
 		return errorFn(fmt.Errorf("%d", resp.StatusCode))
 	}
 
-	c.logger.Printf("[TRACE] Http response: data, %s", string(data))
+	c.config.logger.Printf("[TRACE] Http response: data, %s", string(data))
 
 	if resp.Request.Method == http.MethodPost && out == nil {
 		// post methods that expects no output
@@ -125,7 +151,7 @@ func (c *Client) decodeResp(resp *http.Response, out interface{}) error {
 	if err := json.Unmarshal(data, &output); err != nil {
 		return err
 	}
-	if err := Unmarshal(output.Data, &out); err != nil {
+	if err := Unmarshal(output.Data, &out, c.config.untrackedKeys); err != nil {
 		return err
 	}
 	return nil

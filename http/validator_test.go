@@ -8,7 +8,7 @@ import (
 )
 
 func TestValidatorEndpoint(t *testing.T) {
-	n := New("http://127.0.0.1:4010").Validator()
+	n := New("http://127.0.0.1:4010", WithUntrackedKeys()).Validator()
 
 	t.Run("GetAttesterDuties", func(t *testing.T) {
 		_, err := n.GetAttesterDuties(1, []string{"1"})

@@ -48,8 +48,8 @@ func (b *BuilderEndpoint) GetExecutionPayload(slot uint64, parentHash [32]byte, 
 	return out, err
 }
 
-func (b *BuilderEndpoint) SubmitBlindedBlock(msg *consensus.SignedBlindedBeaconBlock) (*consensus.ExecutionPayloadHeader, error) {
-	var out *consensus.ExecutionPayloadHeader
+func (b *BuilderEndpoint) SubmitBlindedBlock(msg *consensus.SignedBlindedBeaconBlock) (*consensus.ExecutionPayload, error) {
+	var out *consensus.ExecutionPayload
 	err := b.c.Post("/eth/v1/builder/blinded_blocks", msg, &out)
 	return out, err
 }
