@@ -8,7 +8,7 @@ import (
 )
 
 func TestValidatorEndpoint(t *testing.T) {
-	n := New("http://127.0.0.1:4010").Validator()
+	n := New("http://127.0.0.1:4010", WithUntrackedKeys()).Validator()
 
 	t.Run("GetAttesterDuties", func(t *testing.T) {
 		_, err := n.GetAttesterDuties(1, []string{"1"})
@@ -60,6 +60,14 @@ func TestValidatorEndpoint(t *testing.T) {
 
 	t.Run("PrepareBeaconProposer", func(t *testing.T) {
 		err := n.PrepareBeaconProposer([]*ProposalPreparation{{}})
+		assert.NoError(t, err)
+	})
+
+	t.Run("RegisterValidator", func(t *testing.T) {
+		obj := []*SignedValidatorRegistration{
+			{Message: &RegisterValidatorRequest{}},
+		}
+		err := n.RegisterValidator(obj)
 		assert.NoError(t, err)
 	})
 }

@@ -44,13 +44,13 @@ func (c *Client) Events(ctx context.Context, topics []string, handler func(obj i
 		case "head":
 			var headEvent *HeadEvent
 			if err := json.Unmarshal(msg.Data, &headEvent); err != nil {
-				c.logger.Printf("[ERROR]: failed to decode head event: %v", err)
+				c.config.logger.Printf("[ERROR]: failed to decode head event: %v", err)
 			} else {
 				handler(err)
 			}
 
 		default:
-			c.logger.Printf("[DEBUG]: event not tracked: %s", string(msg.Event))
+			c.config.logger.Printf("[DEBUG]: event not tracked: %s", string(msg.Event))
 		}
 	}); err != nil {
 		return err

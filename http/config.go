@@ -10,6 +10,12 @@ func (c *Client) Config() *ConfigEndpoint {
 	return &ConfigEndpoint{c: c}
 }
 
+func (c *ConfigEndpoint) ForkSchedule() ([]*consensus.Fork, error) {
+	var out []*consensus.Fork
+	err := c.c.Get("/eth/v1/config/fork_schedule", &out)
+	return out, err
+}
+
 func (c *ConfigEndpoint) Spec() (*consensus.Spec, error) {
 	var spec *consensus.Spec
 	err := c.c.Get("/eth/v1/config/spec", &spec)

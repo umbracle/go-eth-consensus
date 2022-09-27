@@ -14,18 +14,6 @@ func (c *Client) Builder() *BuilderEndpoint {
 	return &BuilderEndpoint{c: c}
 }
 
-type RegisterValidatorRequest struct {
-	FeeRecipient [20]byte `json:"fee_recipient" ssz-size:"20"`
-	GasLimit     uint64   `json:"gas_limit,string"`
-	Timestamp    uint64   `json:"timestamp,string"`
-	Pubkey       [48]byte `json:"pubkey" ssz-size:"48"`
-}
-
-type SignedValidatorRegistration struct {
-	Message   *RegisterValidatorRequest `json:"message"`
-	Signature [96]byte                  `json:"signature" ssz-size:"96"`
-}
-
 func (b *BuilderEndpoint) RegisterValidator(msg []*SignedValidatorRegistration) error {
 	err := b.c.Post("/eth/v1/builder/validators", msg, nil)
 	return err
@@ -48,8 +36,8 @@ func (b *BuilderEndpoint) GetExecutionPayload(slot uint64, parentHash [32]byte, 
 	return out, err
 }
 
-func (b *BuilderEndpoint) SubmitBlindedBlock(msg *consensus.SignedBlindedBeaconBlock) (*consensus.ExecutionPayloadHeader, error) {
-	var out *consensus.ExecutionPayloadHeader
+func (b *BuilderEndpoint) SubmitBlindedBlock(msg *consensus.SignedBlindedBeaconBlock) (*consensus.ExecutionPayload, error) {
+	var out *consensus.ExecutionPayload
 	err := b.c.Post("/eth/v1/builder/blinded_blocks", msg, &out)
 	return out, err
 }

@@ -4,24 +4,50 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 )
 
 // https://ethereum.github.io/beacon-APIs/#/
 
-type Client struct {
-	url    string
-	logger *log.Logger
+type Config struct {
+	logger        *log.Logger
+	untrackedKeys bool
 }
 
-func New(url string) *Client {
-	return &Client{url: url, logger: log.New(ioutil.Discard, "", 0)}
+type ConfigOption func(*Config)
+
+func WithLogger(logger *log.Logger) ConfigOption {
+	return func(c *Config) {
+		c.logger = logger
+	}
+}
+
+func WithUntrackedKeys() ConfigOption {
+	return func(c *Config) {
+		c.untrackedKeys = true
+	}
+}
+
+type Client struct {
+	url    string
+	config *Config
+}
+
+func New(url string, opts ...ConfigOption) *Client {
+	config := &Config{
+		logger: log.New(io.Discard, "", 0),
+	}
+	for _, opt := range opts {
+		opt(config)
+	}
+
+	return &Client{url: url, config: config}
 }
 
 func (c *Client) SetLogger(logger *log.Logger) {
-	c.logger = logger
+	c.config.logger = logger
 }
 
 func (c *Client) Post(path string, input interface{}, out interface{}) error {
@@ -50,10 +76,14 @@ func (c *Client) Status(path string) (bool, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == 200 {
+	if resp.StatusCode == http.StatusOK {
 		return true, nil
 	}
-	return false, fmt.Errorf("status != 200 (%d)", resp.StatusCode)
+	errorMsg, ok := httpErrorMapping[resp.StatusCode]
+	if ok {
+		return false, errorMsg
+	}
+	return false, fmt.Errorf("status code != 200: %d", resp.StatusCode)
 }
 
 func (c *Client) Get(path string, out interface{}) error {
@@ -63,7 +93,7 @@ func (c *Client) Get(path string, out interface{}) error {
 	}
 	defer resp.Body.Close()
 
-	c.logger.Printf("[TRACE] Get request: path, %s", path)
+	c.config.logger.Printf("[TRACE] Get request: path, %s", path)
 
 	if err := c.decodeResp(resp, out); err != nil {
 		return err
@@ -72,38 +102,36 @@ func (c *Client) Get(path string, out interface{}) error {
 }
 
 var (
+	ErrorIncompleteData      = fmt.Errorf("incomplete data (206)")
 	ErrorBadRequest          = fmt.Errorf("bad request (400)")
 	ErrorNotFound            = fmt.Errorf("not found (404)")
 	ErrorInternalServerError = fmt.Errorf("internal server error (500)")
 	ErrorServiceUnavailable  = fmt.Errorf("service unavailable (503)")
 )
 
+var httpErrorMapping = map[int]error{
+	http.StatusPartialContent:      ErrorIncompleteData,
+	http.StatusBadRequest:          ErrorBadRequest,
+	http.StatusNotFound:            ErrorNotFound,
+	http.StatusInternalServerError: ErrorInternalServerError,
+	http.StatusServiceUnavailable:  ErrorServiceUnavailable,
+}
+
 func (c *Client) decodeResp(resp *http.Response, out interface{}) error {
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
 
-	errorFn := func(code error) error {
-		return fmt.Errorf("status code != 200: %s %w", string(data), code)
+	if resp.StatusCode != http.StatusOK {
+		errorMsg, ok := httpErrorMapping[resp.StatusCode]
+		if ok {
+			return errorMsg
+		}
+		return fmt.Errorf("status code != 200: %s %d", string(data), resp.StatusCode)
 	}
 
-	switch resp.StatusCode {
-	case http.StatusOK:
-		break
-	case http.StatusBadRequest: // 400
-		return errorFn(ErrorBadRequest)
-	case http.StatusNotFound: // 404
-		return errorFn(ErrorNotFound)
-	case http.StatusInternalServerError: // 500
-		return errorFn(ErrorInternalServerError)
-	case http.StatusServiceUnavailable: // 503
-		return errorFn(ErrorServiceUnavailable)
-	default:
-		return errorFn(fmt.Errorf("%d", resp.StatusCode))
-	}
-
-	c.logger.Printf("[TRACE] Http response: data, %s", string(data))
+	c.config.logger.Printf("[TRACE] Http response: data, %s", string(data))
 
 	if resp.Request.Method == http.MethodPost && out == nil {
 		// post methods that expects no output
@@ -125,7 +153,7 @@ func (c *Client) decodeResp(resp *http.Response, out interface{}) error {
 	if err := json.Unmarshal(data, &output); err != nil {
 		return err
 	}
-	if err := Unmarshal(output.Data, &out); err != nil {
+	if err := Unmarshal(output.Data, &out, c.config.untrackedKeys); err != nil {
 		return err
 	}
 	return nil

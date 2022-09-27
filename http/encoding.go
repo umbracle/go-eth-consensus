@@ -113,7 +113,7 @@ func convertArrayToBytes(value reflect.Value) reflect.Value {
 	return slice
 }
 
-func Unmarshal(data []byte, obj interface{}) error {
+func Unmarshal(data []byte, obj interface{}, trackUnusedKeys bool) error {
 	var out1 interface{}
 	if err := json.Unmarshal(data, &out1); err != nil {
 		return err
@@ -134,10 +134,8 @@ func Unmarshal(data []byte, obj interface{}) error {
 	if err = ms.Decode(out1); err != nil {
 		return err
 	}
-	if len(metadata.Unused) != 0 {
-		// this migth help to untrack errors on some keys that are not being tracked
-		// and we really need.
-		// return fmt.Errorf("unmarshal error unused keys: %s", metadata.Unused)
+	if len(metadata.Unused) != 0 && trackUnusedKeys {
+		return fmt.Errorf("unmarshal error unused keys: %s", metadata.Unused)
 	}
 	return nil
 }

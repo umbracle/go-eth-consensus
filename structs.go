@@ -348,7 +348,7 @@ type ExecutionPayload struct {
 	GasUsed       uint64    `json:"gas_used"`
 	Timestamp     uint64    `json:"timestamp"`
 	ExtraData     []byte    `ssz-max:"32" json:"extra_data"`
-	BaseFeePerGas [32]byte  `ssz-size:"32" json:"base_fee_per_gas"`
+	BaseFeePerGas Uint256   `ssz-size:"32" json:"base_fee_per_gas"`
 	BlockHash     [32]byte  `ssz-size:"32" json:"block_hash"`
 	Transactions  [][]byte  `ssz-max:"1048576,1073741824" ssz-size:"?,?" json:"transactions"`
 }

@@ -9,8 +9,17 @@ func (c *Client) Node() *NodeEndpoint {
 }
 
 type Identity struct {
-	PeerID string `json:"peer_id"`
-	ENR    string `json:"enr"`
+	PeerID             string            `json:"peer_id"`
+	ENR                string            `json:"enr"`
+	P2PAddresses       []string          `json:"p2p_addresses"`
+	DiscoveryAddresses []string          `json:"discovery_addresses"`
+	Metadata           *IdentityMetadata `json:"metadata"`
+}
+
+type IdentityMetadata struct {
+	SeqNumber uint64 `json:"seq_number"`
+	AttNets   string `json:"attnets"`
+	SyncNets  string `json:"syncnets"`
 }
 
 // Identity returns the node network identity
@@ -65,10 +74,16 @@ type Syncing struct {
 	HeadSlot     uint64 `json:"head_slot"`
 	SyncDistance string `json:"sync_distance"`
 	IsSyncing    bool   `json:"is_syncing"`
+	IsOptimistic bool   `json:"is_optimistic"`
 }
 
 func (n *NodeEndpoint) Syncing() (*Syncing, error) {
 	var out Syncing
 	err := n.c.Get("/eth/v1/node/syncing", &out)
 	return &out, err
+}
+
+func (n *NodeEndpoint) Health() (bool, error) {
+	status, err := n.c.Status("/eth/v1/node/health")
+	return status, err
 }

@@ -7,7 +7,7 @@ import (
 )
 
 func TestNodeEndpoint(t *testing.T) {
-	n := New("http://127.0.0.1:4010").Node()
+	n := New("http://127.0.0.1:4010", WithUntrackedKeys()).Node()
 
 	t.Run("Identity", func(t *testing.T) {
 		_, err := n.Identity()
@@ -37,5 +37,11 @@ func TestNodeEndpoint(t *testing.T) {
 	t.Run("Syncing", func(t *testing.T) {
 		_, err := n.Syncing()
 		assert.NoError(t, err)
+	})
+
+	t.Run("Health", func(t *testing.T) {
+		status, err := n.Health()
+		assert.NoError(t, err)
+		assert.True(t, status)
 	})
 }
