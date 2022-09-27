@@ -31,10 +31,19 @@ func (b *BeaconEndpoint) SubmitCommitteeDuties(duties []*consensus.SyncCommittee
 	return err
 }
 
+type ValidatorStatus string
+
+const (
+	ValidatorStatusUnknown ValidatorStatus = "unknown"
+	ValidatorStatusActive  ValidatorStatus = "active"
+	ValidatorStatusPending ValidatorStatus = "pending"
+	ValidatorStatusExited  ValidatorStatus = "exited"
+)
+
 type Validator struct {
 	Index     uint64             `json:"index"`
 	Balance   uint64             `json:"balance"`
-	Status    string             `json:"status"`
+	Status    ValidatorStatus    `json:"status"`
 	Validator *ValidatorMetadata `json:"validator"`
 }
 
