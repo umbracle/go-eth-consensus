@@ -43,48 +43,31 @@ type ChainReorgEvent struct {
 	ExecutionOptimistic bool     `json:"execution_optimistic"`
 }
 
-var eventValidTopics = []string{
-	"head", "block", "attestation", "finalized_checkpoint",
-}
-
-func isValidTopic(str string) bool {
-	for _, topic := range eventValidTopics {
-		if str == topic {
-			return true
-		}
-	}
-	return false
+var eventObjMap = map[string]func() interface{}{
+	"head":                   func() interface{} { return new(HeadEvent) },
+	"block":                  func() interface{} { return new(BlockEvent) },
+	"attestation":            func() interface{} { return new(consensus.Attestation) },
+	"voluntary_exit":         func() interface{} { return new(consensus.SignedVoluntaryExit) },
+	"finalized_checkpoint":   func() interface{} { return new(FinalizedCheckpointEvent) },
+	"chain_reorg":            func() interface{} { return new(ChainReorgEvent) },
+	"contribution_and_proof": func() interface{} { return new(consensus.SignedContributionAndProof) },
 }
 
 func (c *Client) Events(ctx context.Context, topics []string, handler func(obj interface{})) error {
 	for _, topic := range topics {
-		if !isValidTopic(topic) {
+		if _, ok := eventObjMap[topic]; !ok {
 			return fmt.Errorf("topic '%s' is not valid", topic)
 		}
 	}
 
 	client := sse.NewClient(c.url + "/eth/v1/events?topics=" + strings.Join(topics, ","))
 	if err := client.SubscribeRawWithContext(ctx, func(msg *sse.Event) {
-		var obj interface{}
-		switch string(msg.Event) {
-		case "head":
-			obj = new(HeadEvent)
-		case "block":
-			obj = new(BlockEvent)
-		case "attestation":
-			obj = new(consensus.Attestation)
-		case "voluntary_exit":
-			obj = new(consensus.SignedVoluntaryExit)
-		case "finalized_checkpoint":
-			obj = new(FinalizedCheckpointEvent)
-		case "chain_reorg":
-			obj = new(ChainReorgEvent)
-		case "contribution_and_proof":
-			obj = new(consensus.SignedContributionAndProof)
-		default:
+		codec, ok := eventObjMap[string(msg.Event)]
+		if !ok {
 			c.config.logger.Printf("[DEBUG]: event not tracked: %s", string(msg.Event))
 			return
 		}
+		obj := codec()
 
 		if err := Unmarshal(msg.Data, obj, c.config.untrackedKeys); err != nil {
 			c.config.logger.Printf("[ERROR]: failed to decode %s event: %v", string(msg.Event), err)
