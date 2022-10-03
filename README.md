@@ -8,13 +8,11 @@ The core of this library was initially part of [eth2-validator](https://github.c
 
 **Consensus data types**. Full set of data types (up to Bellatrix) in `structs.go` at root. It includes the SSZ encoding for each one using [`fastssz`](https://github.com/ferranbt/fastssz). Each type is end-to-end tested with the official consensus spec tests.
 
-**Http client**. Lightweight implementation for the OpenAPI spec. For usage and examples see the [Godoc](https://pkg.go.dev/github.com/umbracle/go-eth-consensus/http). The endpoints are tested against a real server that mocks the OpenAPI spec.
+**Http client**. Lightweight implementation for the [Beacon](https://ethereum.github.io/beacon-APIs) and [Builder](https://ethereum.github.io/builder-specs) OpenAPI spec. For usage and examples see the [Godoc](https://pkg.go.dev/github.com/umbracle/go-eth-consensus/http). The endpoints are tested against a real server that mocks the OpenAPI spec.
 
 **Chaintime**. Simple utilities to interact with slot times and epochs. 
 
 **BLS**. Abstraction to sign, recover and store (with keystore format) BLS keys.
-
-**Builder types**. In progress.
 
 ## Installation
 
