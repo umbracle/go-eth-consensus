@@ -1,4 +1,6 @@
-# 0.1.1 (Unreleased)
+# 0.1.2 (Unreleased)
+
+# 0.1.1 (28 Dec, 2022)
 
 - feat: add `builder` types and http methods [[GH-4](https://github.com/umbracle/eth2-validator/issues/4)]
 - feat: return wrap status code errors in Http client [[GH-8](https://github.com/umbracle/eth2-validator/issues/8)]
