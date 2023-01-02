@@ -13,6 +13,17 @@ type Spec struct {
 	// SlotsPerEpoch is the number of slots in an epoch.
 	SlotsPerEpoch uint64 `json:"SLOTS_PER_EPOCH"`
 
+	MaxCommitteesPerSlot uint64 // TODO
+
+	EpocsPerHistoricalVector uint64
+	MinSeedLookAhead         uint64
+
+	MinEpochsToInactivityPenalty uint64
+	EffectiveBalanceIncrement    uint64
+
+	BaseRewardFactor    uint64
+	BaseRewardsPerEpoch uint64
+
 	SyncCommitteeSize uint64 `json:"SYNC_COMMITTEE_SIZE"`
 
 	// TargetAggregatorsPerCommittee defines the number of aggregators inside one committee.
