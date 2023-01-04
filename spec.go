@@ -24,6 +24,8 @@ type Spec struct {
 	BaseRewardFactor    uint64
 	BaseRewardsPerEpoch uint64
 
+	TargetCommitteeSize uint64
+
 	SyncCommitteeSize uint64 `json:"SYNC_COMMITTEE_SIZE"`
 
 	// TargetAggregatorsPerCommittee defines the number of aggregators inside one committee.

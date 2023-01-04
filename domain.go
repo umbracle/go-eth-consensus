@@ -48,3 +48,18 @@ func ComputeDomain(domain Domain, forkVersion [4]byte, genesisValidatorsRoot Roo
 	}
 	return ToBytes32(append(domain[:], forkRoot[:28]...)), nil
 }
+
+type DomainType Domain
+
+var (
+	DomainBeaconProposerType          = Domain{0, 0, 0, 0}
+	DomainBeaconAttesterType          = Domain{1, 0, 0, 0}
+	DomainRandaomType                 = Domain{2, 0, 0, 0}
+	DomainDepositType                 = Domain{3, 0, 0, 0}
+	DomainVoluntaryExitType           = Domain{4, 0, 0, 0}
+	DomainSelectionProofType          = Domain{5, 0, 0, 0}
+	DomainAggregateAndProofType       = Domain{6, 0, 0, 0}
+	DomainSyncCommitteeType           = Domain{7, 0, 0, 0}
+	DomainSyncCommitteeSelectionProof = Domain{8, 0, 0, 0}
+	DomainContributionAndProof        = Domain{9, 0, 0, 0}
+)

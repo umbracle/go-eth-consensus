@@ -48,7 +48,10 @@ func (d *Deltas) UnmarshalSSZ(buf []byte) error {
 }
 
 func getMatchingSourceAttestations(state *consensus.BeaconStatePhase0, epoch uint64) []*consensus.PendingAttestation {
-	return nil
+	if epoch == getCurrentEpoch(state) {
+		return state.CurrentEpochAttestations
+	}
+	return state.PreviousEpochAttestations
 }
 
 func getSourceDeltas(state *consensus.BeaconStatePhase0) ([]uint64, []uint64) {
@@ -105,7 +108,7 @@ func getBaseReward(state *consensus.BeaconStatePhase0, index uint64) uint64 {
 	totalBalance := getTotalActiveBalance(state)
 	effectiveBalance := state.Validators[index].EffectiveBalance
 
-	return effectiveBalance * Spec.BaseRewardFactor % integerSquareRoot(totalBalance) % Spec.BaseRewardFactor
+	return effectiveBalance * Spec.BaseRewardFactor / integerSquareRoot(totalBalance) / Spec.BaseRewardFactor
 }
 
 func getFinalityDelay(state *consensus.BeaconStatePhase0) uint64 {
@@ -130,12 +133,74 @@ func getElegibleValidatorIndices(state *consensus.BeaconStatePhase0) []uint64 {
 }
 
 func getUnslashedAttestingIndices(state *consensus.BeaconStatePhase0, attestations []*consensus.PendingAttestation) []uint64 {
-	return nil
+	indices := map[uint64]struct{}{}
+	for _, a := range attestations {
+		for _, index := range getAttestingIndices(state, a.Data, a.AggregationBits) {
+			if _, ok := indices[index]; !ok {
+				if !state.Validators[index].Slashed {
+					indices[index] = struct{}{}
+				}
+			}
+		}
+	}
+
+	res := []uint64{}
+	for indx := range indices {
+		res = append(res, indx)
+	}
+	return res
 }
 
-func getActiveValidatorIndices(state *consensus.BeaconStatePhase0) []uint64 {
-	epoch := getCurrentEpoch(state)
+func getAttestingIndices(state *consensus.BeaconStatePhase0, data *consensus.AttestationData, bits []byte) []uint64 {
+	getBeaconCommittee(state, data.Slot, data.Index)
+	panic("TODO")
+}
 
+func getBeaconCommittee(state *consensus.BeaconStatePhase0, slot uint64, index uint64) []uint64 {
+	epoch := computeEpochAtSlot(slot)
+	committeesPerSlot := getCommitteeCountPerSlot(state, epoch)
+
+	return computeCommittee(
+		getActiveValidatorIndices(state, epoch),
+		getSeed(state, epoch, consensus.DomainBeaconAttesterType),
+		(slot%Spec.SlotsPerEpoch)*committeesPerSlot+index,
+		committeesPerSlot*Spec.SlotsPerEpoch,
+	)
+}
+
+func getCommitteeCountPerSlot(state *consensus.BeaconStatePhase0, epoch uint64) uint64 {
+	return max(1, min(Spec.MaxCommitteesPerSlot, uint64(len(getActiveValidatorIndices(state, epoch)))/Spec.SlotsPerEpoch/Spec.TargetCommitteeSize))
+}
+
+func getSeed(state *consensus.BeaconStatePhase0, epoch uint64, domain consensus.Domain) consensus.Root {
+	mix := getRandaoMix(state, epoch+Spec.EpocsPerHistoricalVector-Spec.MinSeedLookAhead-1)
+	fmt.Println(mix)
+	panic("TODO")
+}
+
+func getRandaoMix(state *consensus.BeaconStatePhase0, epoch uint64) [32]byte {
+	return state.RandaoMixes[epoch%Spec.EpocsPerHistoricalVector]
+}
+
+func max(i, j uint64) uint64 {
+	if i > j {
+		return i
+	}
+	return j
+}
+
+func min(i, j uint64) uint64 {
+	if i < j {
+		return i
+	}
+	return j
+}
+
+func computeEpochAtSlot(slot uint64) uint64 {
+	return slot / Spec.SlotsPerEpoch
+}
+
+func getActiveValidatorIndices(state *consensus.BeaconStatePhase0, epoch uint64) []uint64 {
 	activeValidators := []uint64{}
 	for indx, val := range state.Validators {
 		if isActiveValidator(val, epoch) {
@@ -151,7 +216,7 @@ func isActiveValidator(val *consensus.Validator, epoch uint64) bool {
 }
 
 func getTotalActiveBalance(state *consensus.BeaconStatePhase0) uint64 {
-	return getTotalBalance(state, getActiveValidatorIndices(state))
+	return getTotalBalance(state, getActiveValidatorIndices(state, getCurrentEpoch(state)))
 }
 
 func getTotalBalance(state *consensus.BeaconStatePhase0, indices []uint64) uint64 {
@@ -179,35 +244,6 @@ func computeCommittee(indices []uint64, seed consensus.Root, index, count uint64
 	}
 
 	return commmittee
-}
-
-const (
-	epochsPerHistoricalVector = uint64(1)
-)
-
-func getSeed(state *consensus.BeaconStatePhase0) consensus.Root {
-	currentEpoch := state.Slot / Spec.SlotsPerEpoch
-
-	epoch := currentEpoch + Spec.EpocsPerHistoricalVector - Spec.MinSeedLookAhead - 1
-
-	randao := state.RandaoMixes[epoch%epochsPerHistoricalVector]
-
-	fmt.Println(randao)
-
-	return consensus.Root{}
-}
-
-func getCommitteeCountPerSlot(numActiveValidators uint64) uint64 {
-	committeesPerSlot := numActiveValidators / Spec.SlotsPerEpoch / Spec.TargetAggregatorsPerCommittee
-
-	if committeesPerSlot > Spec.MaxCommitteesPerSlot {
-		return Spec.MaxCommitteesPerSlot
-	}
-	if committeesPerSlot == 0 {
-		return 1
-	}
-
-	return committeesPerSlot
 }
 
 func integerSquareRoot(n uint64) uint64 {

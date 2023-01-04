@@ -1,6 +1,7 @@
 package spec
 
 import (
+	"fmt"
 	"testing"
 
 	consensus "github.com/umbracle/go-eth-consensus"
@@ -39,7 +40,9 @@ func TestRewards(t *testing.T) {
 	test := &specRewardTest{}
 	test.Decode(t, th)
 
-	GetSourceDeltas(&test.Pre)
+	fmt.Println(getSourceDeltas(&test.Pre))
+
+	fmt.Println(test.SourceDeltas)
 }
 
 type specRewardTest struct {
