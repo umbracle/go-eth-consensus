@@ -38,11 +38,15 @@ const (
 type testCallback func(f fork) codec
 
 var codecs = map[string]testCallback{
-	"AttestationData":   func(f fork) codec { return new(AttestationData) },
-	"Checkpoint":        func(f fork) codec { return new(Checkpoint) },
-	"AggregateAndProof": func(f fork) codec { return new(AggregateAndProof) },
-	"Attestation":       func(f fork) codec { return new(Attestation) },
-	"AttesterSlashing":  func(f fork) codec { return new(AttesterSlashing) },
+	"AttestationData":             func(f fork) codec { return new(AttestationData) },
+	"Checkpoint":                  func(f fork) codec { return new(Checkpoint) },
+	"AggregateAndProof":           func(f fork) codec { return new(AggregateAndProof) },
+	"Attestation":                 func(f fork) codec { return new(Attestation) },
+	"AttesterSlashing":            func(f fork) codec { return new(AttesterSlashing) },
+	"LightClientBootstrap":        func(f fork) codec { return new(LightClientBootstrap) },
+	"LightClientFinalityUpdate":   func(f fork) codec { return new(LightClientFinalityUpdate) },
+	"LightClientOptimisticUpdate": func(f fork) codec { return new(LightClientOptimisticUpdate) },
+	"LightClientUpdate":           func(f fork) codec { return new(LightClientUpdate) },
 	"BeaconBlock": func(f fork) codec {
 		if f == capellaFork {
 			return new(BeaconBlockCapella)
