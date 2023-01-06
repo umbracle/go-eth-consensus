@@ -32,6 +32,7 @@ const (
 	phase0Fork    = "phase0"
 	altairFork    = "altair"
 	bellatrixFork = "bellatrix"
+	capellaFork   = "capella"
 )
 
 type testCallback func(f fork) codec
@@ -43,24 +44,24 @@ var codecs = map[string]testCallback{
 	"Attestation":       func(f fork) codec { return new(Attestation) },
 	"AttesterSlashing":  func(f fork) codec { return new(AttesterSlashing) },
 	"BeaconBlock": func(f fork) codec {
-		if f == phase0Fork {
-			return new(BeaconBlockPhase0)
+		if f == capellaFork {
+			return new(BeaconBlockCapella)
 		} else if f == altairFork {
 			return new(BeaconBlockAltair)
 		} else if f == bellatrixFork {
 			return new(BeaconBlockBellatrix)
 		}
-		return nil
+		return new(BeaconBlockPhase0)
 	},
 	"BeaconBlockBody": func(f fork) codec {
-		if f == phase0Fork {
-			return new(BeaconBlockBodyPhase0)
+		if f == capellaFork {
+			return new(BeaconBlockBodyCapella)
 		} else if f == altairFork {
 			return new(BeaconBlockBodyAltair)
 		} else if f == bellatrixFork {
 			return new(BeaconBlockBodyBellatrix)
 		}
-		return nil
+		return new(BeaconBlockBodyPhase0)
 	},
 	"BeaconBlockHeader":  func(f fork) codec { return new(BeaconBlockHeader) },
 	"Deposit":            func(f fork) codec { return new(Deposit) },
@@ -72,14 +73,14 @@ var codecs = map[string]testCallback{
 	"PendingAttestation": func(f fork) codec { return new(PendingAttestation) },
 	"ProposerSlashing":   func(f fork) codec { return new(ProposerSlashing) },
 	"SignedBeaconBlock": func(f fork) codec {
-		if f == phase0Fork {
-			return new(SignedBeaconBlockPhase0)
+		if f == capellaFork {
+			return new(SignedBeaconBlockCapella)
 		} else if f == altairFork {
 			return new(SignedBeaconBlockAltair)
 		} else if f == bellatrixFork {
 			return new(SignedBeaconBlockBellatrix)
 		}
-		return nil
+		return new(SignedBeaconBlockPhase0)
 	},
 	"SignedBeaconBlockHeader":     func(f fork) codec { return new(SignedBeaconBlockHeader) },
 	"SignedVoluntaryExit":         func(f fork) codec { return new(SignedVoluntaryExit) },
@@ -98,18 +99,32 @@ var codecs = map[string]testCallback{
 	"ForkData":                    func(f fork) codec { return new(ForkData) },
 	"SignedAggregateAndProof":     func(f fork) codec { return new(SignedAggregateAndProof) },
 	"PowBlock":                    func(f fork) codec { return new(PowBlock) },
-	"ExecutionPayload":            func(f fork) codec { return new(ExecutionPayload) },
-	"ExecutionPayloadHeader":      func(f fork) codec { return new(ExecutionPayloadHeader) },
+	"ExecutionPayload": func(f fork) codec {
+		if f == capellaFork {
+			return new(ExecutionPayloadCapella)
+		}
+		return new(ExecutionPayload)
+	},
+	"ExecutionPayloadHeader": func(f fork) codec {
+		if f == capellaFork {
+			return new(ExecutionPayloadHeaderCapella)
+		}
+		return new(ExecutionPayloadHeader)
+	},
 	"BeaconState": func(f fork) codec {
-		if f == phase0Fork {
-			return new(BeaconStatePhase0)
-		} else if f == altairFork {
+		if f == altairFork {
 			return new(BeaconStateAltair)
 		} else if f == bellatrixFork {
 			return new(BeaconStateBellatrix)
+		} else if f == capellaFork {
+			return new(BeaconStateCapella)
 		}
-		return nil
+		return new(BeaconStatePhase0)
 	},
+	"BLSToExecutionChange":       func(f fork) codec { return new(BLSToExecutionChange) },
+	"HistoricalSummary":          func(f fork) codec { return new(HistoricalSummary) },
+	"SignedBLSToExecutionChange": func(f fork) codec { return new(SignedBLSToExecutionChange) },
+	"Withdrawal":                 func(f fork) codec { return new(Withdrawal) },
 }
 
 func testFork(t *testing.T, fork fork) {
@@ -143,6 +158,10 @@ func TestSpecMainnet_Altair(t *testing.T) {
 
 func TestSpecMainnet_Bellatrix(t *testing.T) {
 	testFork(t, bellatrixFork)
+}
+
+func TestSpecMainnet_Capella(t *testing.T) {
+	testFork(t, capellaFork)
 }
 
 func formatSpecFailure(errHeader, specFile, structName string, err error) string {
