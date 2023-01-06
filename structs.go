@@ -192,6 +192,36 @@ type SigningData struct {
 
 // Altair fork
 
+type LightClientBootstrap struct {
+	Header                     *BeaconBlockHeader `json:"header"`
+	CurrentSyncCommittee       *SyncCommittee     `json:"current_sync_committee"`
+	CurrentSyncCommitteeBranch [][32]byte         `json:"current_sync_committee_branch" ssz-size:"5,32"`
+}
+
+type LightClientFinalityUpdate struct {
+	AttestedHeader  *BeaconBlockHeader `json:"attested_header"`
+	FinalizedHeader *BeaconBlockHeader `json:"finalized_header"`
+	FinalityBranch  [][32]byte         `json:"finality_branch" ssz-size:"6,32"`
+	SyncAggregate   *SyncAggregate     `json:"sync_aggregate"`
+	SignatureSlot   uint64             `json:"signature_slot"`
+}
+
+type LightClientOptimisticUpdate struct {
+	AttestedHeader *BeaconBlockHeader `json:"attested_header"`
+	SyncAggregate  *SyncAggregate     `json:"sync_aggregate"`
+	SignatureSlot  uint64             `json:"signature_slot"`
+}
+
+type LightClientUpdate struct {
+	AttestedHeader          *BeaconBlockHeader `json:"attested_header"`
+	NextSyncCommittee       *SyncCommittee     `json:"next_sync_committee"`
+	NextSyncCommitteeBranch [][32]byte         `json:"next_sync_committee_branch" ssz-size:"5,32"`
+	FinalizedHeader         *BeaconBlockHeader `json:"finalized_header"`
+	FinalityBranch          [][32]byte         `json:"finality_branch" ssz-size:"6,32"`
+	SyncAggregate           *SyncAggregate     `json:"sync_aggregate"`
+	SignatureSlot           uint64             `json:"signature_slot"`
+}
+
 type BeaconStateAltair struct {
 	GenesisTime                 uint64             `json:"genesis_time"`
 	GenesisValidatorsRoot       [32]byte           `json:"genesis_validators_root" ssz-size:"32"`
