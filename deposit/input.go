@@ -2,6 +2,7 @@ package deposit
 
 import (
 	"encoding/hex"
+	"fmt"
 
 	ssz "github.com/ferranbt/fastssz"
 	"github.com/umbracle/ethgo/abi"
@@ -84,4 +85,32 @@ func signingData(obj ssz.HashRoot) ([32]byte, error) {
 		return [32]byte{}, err
 	}
 	return root, nil
+}
+
+func Verify(data *consensus.DepositData) error {
+	pub := &bls.PublicKey{}
+	if err := pub.Deserialize(data.Pubkey[:]); err != nil {
+		return err
+	}
+
+	sig := &bls.Signature{}
+	if err := sig.Deserialize(data.Signature[:]); err != nil {
+		return err
+	}
+
+	deposit := consensus.DepositMessage{
+		Pubkey:                data.Pubkey,
+		Amount:                data.Amount,
+		WithdrawalCredentials: data.WithdrawalCredentials,
+	}
+	root, err := signingData(&deposit)
+	if err != nil {
+		return err
+	}
+
+	if !sig.VerifyByte(pub, root[:]) {
+		return fmt.Errorf("bad signature")
+	}
+
+	return nil
 }

@@ -10,6 +10,7 @@ var Spec = &consensus.Spec{
 	MinSeedLookAhead:             1,
 	MinEpochsToInactivityPenalty: 4,
 	EffectiveBalanceIncrement:    1000000000,
+	MaxEffectiveBalance:          32000000000,
 	BaseRewardFactor:             64,
 	BaseRewardsPerEpoch:          4,
 	TargetCommitteeSize:          128,

@@ -1,10 +1,13 @@
 package spec
 
 import (
+	"crypto/sha256"
+	"encoding/binary"
 	"fmt"
 
 	ssz "github.com/ferranbt/fastssz"
 	consensus "github.com/umbracle/go-eth-consensus"
+	"github.com/umbracle/go-eth-consensus/bitlist"
 )
 
 type Deltas struct {
@@ -152,8 +155,15 @@ func getUnslashedAttestingIndices(state *consensus.BeaconStatePhase0, attestatio
 }
 
 func getAttestingIndices(state *consensus.BeaconStatePhase0, data *consensus.AttestationData, bits []byte) []uint64 {
-	getBeaconCommittee(state, data.Slot, data.Index)
-	panic("TODO")
+	blist := bitlist.BitList(bits)
+
+	res := []uint64{}
+	for _, c := range getBeaconCommittee(state, data.Slot, data.Index) {
+		if blist.BitAt(c) {
+			res = append(res, c)
+		}
+	}
+	return res
 }
 
 func getBeaconCommittee(state *consensus.BeaconStatePhase0, slot uint64, index uint64) []uint64 {
@@ -174,8 +184,21 @@ func getCommitteeCountPerSlot(state *consensus.BeaconStatePhase0, epoch uint64) 
 
 func getSeed(state *consensus.BeaconStatePhase0, epoch uint64, domain consensus.Domain) consensus.Root {
 	mix := getRandaoMix(state, epoch+Spec.EpocsPerHistoricalVector-Spec.MinSeedLookAhead-1)
-	fmt.Println(mix)
-	panic("TODO")
+
+	epochBuf := make([]byte, 8)
+	binary.LittleEndian.PutUint64(epochBuf, epoch)
+
+	hash := sha256.New()
+	hash.Write(domain[:])
+	hash.Write(epochBuf)
+	hash.Write(mix[:])
+
+	fmt.Println(domain[:], epochBuf, mix)
+
+	root := consensus.Root{}
+	copy(root[:], hash.Sum(nil))
+
+	return root
 }
 
 func getRandaoMix(state *consensus.BeaconStatePhase0, epoch uint64) [32]byte {

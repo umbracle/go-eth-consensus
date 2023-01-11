@@ -19,13 +19,13 @@ import (
 func TestShuffle(t *testing.T) {
 	path := []string{"shuffling", "mapping.yaml"}
 
-	listTestData(path, func(th *testHandler) {
+	listTestData(t, path, func(th *testHandler) {
 		var test struct {
 			Seed    consensus.Root
 			Count   uint64
 			Mapping []uint64
 		}
-		th.decode(t, &test)
+		th.decode(&test)
 
 		for i := uint64(0); i < test.Count; i++ {
 			index := ComputeShuffleIndex(i, test.Count, test.Seed)
@@ -34,16 +34,14 @@ func TestShuffle(t *testing.T) {
 	})
 }
 
-func listTestData(paths []string, handlerFn func(tt *testHandler)) error {
+func listTestData(t *testing.T, paths []string, handlerFn func(tt *testHandler)) error {
 	folder := "../eth2.0-spec-tests/tests/mainnet"
 	regex := ".*\\/" + strings.Join(paths, "\\/.*\\/")
 
 	fmt.Println(regex)
 
 	r, err := regexp.Compile(regex)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	return filepath.Walk(folder, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
@@ -51,6 +49,7 @@ func listTestData(paths []string, handlerFn func(tt *testHandler)) error {
 		}
 		if r.MatchString(path) {
 			handler := &testHandler{
+				t:    t,
 				path: path,
 			}
 			handlerFn(handler)
@@ -60,60 +59,54 @@ func listTestData(paths []string, handlerFn func(tt *testHandler)) error {
 }
 
 type testHandler struct {
+	t    *testing.T
 	path string
 }
 
-func (th *testHandler) decodeFile(t *testing.T, subPath string, obj interface{}) {
+func (th *testHandler) decodeFile(subPath string, obj interface{}) {
 	path := th.path
 	if subPath != "" {
 		path = filepath.Join(path, subPath)
 	}
 	var content []byte
+
 	ok, err := fileExists(path)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(th.t, err)
+
 	if ok {
 		content, err = ioutil.ReadFile(path)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if err := ssz.UnmarshalSSZTest(content, obj); err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(th.t, err)
+
+		err = ssz.UnmarshalSSZTest(content, obj)
+		require.NoError(th.t, err)
 	} else {
 		// try to read the file as ssz_snappy
 		snappyPath := path + ".ssz_snappy"
 
 		ok, err := fileExists(snappyPath)
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(th.t, err)
+
 		if !ok {
-			t.Fatalf("file %s not found (neither snappy)", subPath)
+			th.t.Fatalf("file %s not found (neither snappy)", subPath)
 		}
 
 		snappyContent, err := ioutil.ReadFile(snappyPath)
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(th.t, err)
+
 		content, err = snappy.Decode(nil, snappyContent)
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(th.t, err)
 
 		sszObj, ok := obj.(ssz.Unmarshaler)
 		if !ok {
-			t.Fatalf("obj '%s' is not ssz for snappy decompress", subPath)
+			th.t.Fatalf("obj '%s' is not ssz for snappy decompress", subPath)
 		}
-		if err := sszObj.UnmarshalSSZ(content); err != nil {
-			t.Fatal(err)
-		}
+		err = sszObj.UnmarshalSSZ(content)
+		require.NoError(th.t, err)
 	}
 }
 
-func (th *testHandler) decode(t *testing.T, obj interface{}) {
-	th.decodeFile(t, "", obj)
+func (th *testHandler) decode(obj interface{}) {
+	th.decodeFile("", obj)
 }
 
 func fileExists(path string) (bool, error) {

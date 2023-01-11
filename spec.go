@@ -26,6 +26,8 @@ type Spec struct {
 
 	TargetCommitteeSize uint64
 
+	MaxEffectiveBalance uint64
+
 	SyncCommitteeSize uint64 `json:"SYNC_COMMITTEE_SIZE"`
 
 	// TargetAggregatorsPerCommittee defines the number of aggregators inside one committee.

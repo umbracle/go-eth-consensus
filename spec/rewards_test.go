@@ -29,6 +29,7 @@ type opAttestationTest struct {
 
 func TestRewards(t *testing.T) {
 	th := &testHandler{
+		t:    t,
 		path: "../eth2.0-spec-tests/tests/mainnet/phase0/rewards/basic/pyspec_tests/full_all_correct",
 	}
 	/*
@@ -38,7 +39,7 @@ func TestRewards(t *testing.T) {
 	*/
 
 	test := &specRewardTest{}
-	test.Decode(t, th)
+	test.Decode(th)
 
 	fmt.Println(getSourceDeltas(&test.Pre))
 
@@ -53,10 +54,10 @@ type specRewardTest struct {
 	TargetDeltas            Deltas
 }
 
-func (s *specRewardTest) Decode(t *testing.T, th *testHandler) {
-	th.decodeFile(t, "pre", &s.Pre)
-	th.decodeFile(t, "head_deltas", &s.HeadDeltas)
-	th.decodeFile(t, "inactivity_penalty_deltas", &s.InactivityPenaltyDeltas)
-	th.decodeFile(t, "source_deltas", &s.SourceDeltas)
-	th.decodeFile(t, "target_deltas", &s.SourceDeltas)
+func (s *specRewardTest) Decode(th *testHandler) {
+	th.decodeFile("pre", &s.Pre)
+	th.decodeFile("head_deltas", &s.HeadDeltas)
+	th.decodeFile("inactivity_penalty_deltas", &s.InactivityPenaltyDeltas)
+	th.decodeFile("source_deltas", &s.SourceDeltas)
+	th.decodeFile("target_deltas", &s.SourceDeltas)
 }

@@ -4,12 +4,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/umbracle/ethgo"
 	"github.com/umbracle/ethgo/contract"
 	"github.com/umbracle/ethgo/jsonrpc"
 	"github.com/umbracle/ethgo/testutil"
 	"github.com/umbracle/ethgo/wallet"
-	consensus "github.com/umbracle/go-eth-consensus"
 	"github.com/umbracle/go-eth-consensus/bls"
 )
 
@@ -20,33 +20,8 @@ func TestDeposit_Signing(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	pub := &bls.PublicKey{}
-	if err := pub.Deserialize(data.Pubkey[:]); err != nil {
-		t.Fatal(err)
-	}
-
-	sig := &bls.Signature{}
-	if err := sig.Deserialize(data.Signature[:]); err != nil {
-		t.Fatal(err)
-	}
-
-	deposit := consensus.DepositMessage{
-		Pubkey:                data.Pubkey,
-		Amount:                data.Amount,
-		WithdrawalCredentials: data.WithdrawalCredentials,
-	}
-	root, err := signingData(&deposit)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	valid, err := sig.VerifyByte(pub, root[:])
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !valid {
-		t.Fatal("bad signature")
-	}
+	err = Verify(data)
+	require.NoError(t, err)
 }
 
 func TestDeposit_EndToEnd(t *testing.T) {
