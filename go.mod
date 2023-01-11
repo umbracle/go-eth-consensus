@@ -6,6 +6,7 @@ require (
 	github.com/ferranbt/fastssz v0.1.1
 	github.com/golang/snappy v0.0.3
 	github.com/hashicorp/go-uuid v1.0.3
+	github.com/kilic/bls12-381 v0.1.0
 	github.com/mitchellh/mapstructure v1.3.2
 	github.com/r3labs/sse v0.0.0-20210224172625-26fe804710bc
 	github.com/stretchr/testify v1.8.0
@@ -47,7 +48,7 @@ require (
 	github.com/valyala/fastjson v1.4.1 // indirect
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
 	golang.org/x/net v0.0.0-20191116160921-f9c825593386 // indirect
-	golang.org/x/sys v0.0.0-20191026070338-33540a1f6037 // indirect
+	golang.org/x/sys v0.0.0-20201101102859-da207088b7d1 // indirect
 	golang.org/x/text v0.3.2 // indirect
 	gopkg.in/cenkalti/backoff.v1 v1.1.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
