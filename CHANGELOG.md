@@ -1,4 +1,6 @@
-# 0.1.2 (Unreleased)
+# 0.1.3 (Unreleased)
+
+# 0.1.2 (12 Jan, 2022)
 
 - feat: Add non-cgo bls library [[GH-24](https://github.com/umbracle/eth2-validator/issues/24)]
 - feat: Add bls spec tests [[GH-23](https://github.com/umbracle/eth2-validator/issues/23)]
