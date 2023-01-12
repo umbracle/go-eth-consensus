@@ -19,3 +19,32 @@ The core of this library was initially part of [eth2-validator](https://github.c
 ```
 $ go get github.com/umbracle/go-eth-consensus
 ```
+
+## Bls benchmark
+
+Benchmark for both BLS implementations:
+
+```
+$ CGO_ENABLED=0 go test -v ./bls/... -run=XXX -bench=.
+goos: linux
+goarch: amd64
+pkg: github.com/umbracle/go-eth-consensus/bls
+cpu: Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz
+BenchmarkBLS_Sign
+BenchmarkBLS_Sign-4     	    2330	    515495 ns/op	   30192 B/op	     282 allocs/op
+BenchmarkBLS_Verify
+BenchmarkBLS_Verify-4   	     814	   1646769 ns/op	   74048 B/op	     190 allocs/op
+PASS
+ok  	github.com/umbracle/go-eth-consensus/bls	3.739s
+$ CGO_ENABLED=1 go test -v ./bls/... -run=XXX -bench=.
+goos: linux
+goarch: amd64
+pkg: github.com/umbracle/go-eth-consensus/bls
+cpu: Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz
+BenchmarkBLS_Sign
+BenchmarkBLS_Sign-4     	    2833	    431271 ns/op	     480 B/op	       2 allocs/op
+BenchmarkBLS_Verify
+BenchmarkBLS_Verify-4   	    1282	    903174 ns/op	    4545 B/op	      15 allocs/op
+PASS
+ok  	github.com/umbracle/go-eth-consensus/bls	2.525s
+```
