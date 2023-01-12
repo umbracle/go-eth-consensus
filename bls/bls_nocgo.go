@@ -4,6 +4,7 @@
 package bls
 
 import (
+	"crypto/rand"
 	"fmt"
 	"math/big"
 
@@ -21,9 +22,12 @@ type Signature struct {
 }
 
 func (s *Signature) Deserialize(buf []byte) error {
-	g2, err := bls12381.NewG2().FromBytes(buf)
+	g2, err := bls12381.NewG2().FromCompressed(buf)
 	if err != nil {
 		return err
+	}
+	if bls12381.NewG2().IsZero(g2) {
+		return fmt.Errorf("infinity")
 	}
 	s.sig = g2
 	return nil
@@ -35,17 +39,17 @@ func (s *Signature) Serialize() (res [96]byte) {
 	return
 }
 
-func (s *Signature) VerifyByte(pub *PublicKey, msg []byte) bool {
-	g2, err := bls12381.NewG2().HashToCurve(msg, domain)
+func (s *Signature) VerifyByte(pub *PublicKey, msg []byte) (bool, error) {
+	hash, err := bls12381.NewG2().HashToCurve(msg, domain)
 	if err != nil {
-		panic(err)
+		return false, err
 	}
-	fmt.Println(g2)
 
 	e := bls12381.NewEngine()
-	e.AddPair(pub.pub, g2)
+	e.AddPairInv(e.G1.One(), s.sig)
+	e.AddPair(pub.pub, hash)
 
-	return e.Result().IsOne()
+	return e.Check(), nil
 }
 
 // PublicKey is a Bls public key
@@ -54,9 +58,12 @@ type PublicKey struct {
 }
 
 func (p *PublicKey) Deserialize(buf []byte) error {
-	g1, err := bls12381.NewG1().FromBytes(buf)
+	g1, err := bls12381.NewG1().FromCompressed(buf)
 	if err != nil {
 		return err
+	}
+	if bls12381.NewG1().IsZero(g1) {
+		return fmt.Errorf("infinity")
 	}
 	p.pub = g1
 	return nil
@@ -88,16 +95,24 @@ func (s *SecretKey) GetPublicKey() *PublicKey {
 	return &PublicKey{pub: p}
 }
 
-func (s *SecretKey) Sign(msg []byte) *Signature {
-	g2, err := bls12381.NewG2().HashToCurve(msg, domain)
+func (s *SecretKey) Sign(msg []byte) (*Signature, error) {
+	hash, err := bls12381.NewG2().HashToCurve(msg, domain)
+	if err != nil {
+		return nil, err
+	}
+
+	g2 := bls12381.NewG2()
+	g2.MulScalarBig(hash, hash, s.key)
+
+	return &Signature{sig: hash}, nil
+}
+
+var curveOrder, _ = new(big.Int).SetString("73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001", 16)
+
+func RandomKey() *SecretKey {
+	k, err := rand.Int(rand.Reader, curveOrder)
 	if err != nil {
 		panic(err)
 	}
-
-	g2 = bls12381.NewG2().MulScalarBig(g2, g2, s.key)
-	return &Signature{sig: g2}
-}
-
-func RandomKey() *SecretKey {
-	return nil
+	return &SecretKey{key: k}
 }

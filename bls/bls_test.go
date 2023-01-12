@@ -15,9 +15,13 @@ func TestBLS_Simple(t *testing.T) {
 	msg := []byte("msg")
 	priv := RandomKey()
 
-	sig0 := priv.Sign(msg).Serialize()
+	sig0, err := priv.Sign(msg)
+	require.NoError(t, err)
+
+	sig0B := sig0.Serialize()
+
 	sig1 := &Signature{}
-	if err := sig1.Deserialize(sig0[:]); err != nil {
+	if err := sig1.Deserialize(sig0B[:]); err != nil {
 		t.Fatal(err)
 	}
 
@@ -27,9 +31,9 @@ func TestBLS_Simple(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !sig1.VerifyByte(pub1, msg) {
-		t.Fatal("failed to validate deposit")
-	}
+	valid, err := sig1.VerifyByte(pub1, msg)
+	require.NoError(t, err)
+	require.True(t, valid)
 }
 
 func TestBLS_Verify(t *testing.T) {
@@ -55,13 +59,24 @@ func TestBLS_Verify(t *testing.T) {
 		require.NoError(t, err)
 
 		pub := new(PublicKey)
-		require.NoError(t, pub.Deserialize(pubKeyB))
+		if err = pub.Deserialize(pubKeyB); err != nil {
+			if !obj.Output {
+				return
+			}
+			t.Fatal("failed to unmarshal pubkey")
+		}
 
 		sig := new(Signature)
-		require.NoError(t, sig.Deserialize(signatureB))
+		if err := sig.Deserialize(signatureB); err != nil {
+			if !obj.Output {
+				return
+			}
+			t.Fatal("failed to unmarshal signature")
+		}
 
-		output := sig.VerifyByte(pub, messageB)
-		require.Equal(t, output, obj.Output)
+		output, err := sig.VerifyByte(pub, messageB)
+		require.NoError(t, err)
+		require.Equal(t, obj.Output, output)
 	})
 }
 
@@ -90,11 +105,13 @@ func TestBLS_Sign(t *testing.T) {
 		sec := new(SecretKey)
 		require.NoError(t, sec.Unmarshal(privKeyB))
 
-		sig := sec.Sign(messageB)
+		sig, err := sec.Sign(messageB)
+		require.NoError(t, err)
 
 		// we should be able to verify a signature
-		//verify := sig.VerifyByte(sec.GetPublicKey(), messageB)
-		//require.True(t, verify)
+		verify, err := sig.VerifyByte(sec.GetPublicKey(), messageB)
+		require.NoError(t, err)
+		require.True(t, verify)
 
 		outputB, err := hex.DecodeString((*obj.Output)[2:])
 		require.NoError(t, err)

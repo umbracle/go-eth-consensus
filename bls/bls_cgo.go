@@ -5,6 +5,7 @@ package bls
 
 import (
 	"crypto/rand"
+	"fmt"
 
 	blst "github.com/supranational/blst/bindings/go"
 )
@@ -20,7 +21,11 @@ type Signature struct {
 }
 
 func (s *Signature) Deserialize(buf []byte) error {
-	s.sig = new(blstSignature).Uncompress(buf)
+	sig := new(blstSignature).Uncompress(buf)
+	if sig == nil {
+		return fmt.Errorf("failed to deserialize")
+	}
+	s.sig = sig
 	return nil
 }
 
@@ -29,8 +34,8 @@ func (s *Signature) Serialize() (buf [96]byte) {
 	return
 }
 
-func (s *Signature) VerifyByte(pub *PublicKey, msg []byte) bool {
-	return s.sig.Verify(false, pub.pub, false, msg, dst)
+func (s *Signature) VerifyByte(pub *PublicKey, msg []byte) (bool, error) {
+	return s.sig.Verify(false, pub.pub, false, msg, dst), nil
 }
 
 // PublicKey is a Bls public key
@@ -39,7 +44,11 @@ type PublicKey struct {
 }
 
 func (p *PublicKey) Deserialize(buf []byte) error {
-	p.pub = new(blstPublicKey).Uncompress(buf)
+	pub := new(blstPublicKey).Uncompress(buf)
+	if pub == nil {
+		return fmt.Errorf("failed to deserialize")
+	}
+	p.pub = pub
 	return nil
 }
 
@@ -67,9 +76,9 @@ func (s *SecretKey) GetPublicKey() *PublicKey {
 	return &PublicKey{pub: pub}
 }
 
-func (s *SecretKey) Sign(msg []byte) *Signature {
+func (s *SecretKey) Sign(msg []byte) (*Signature, error) {
 	sig := new(blstSignature).Sign(s.key, msg, dst)
-	return &Signature{sig: sig}
+	return &Signature{sig: sig}, nil
 }
 
 func RandomKey() *SecretKey {

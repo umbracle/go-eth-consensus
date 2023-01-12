@@ -40,7 +40,11 @@ func TestDeposit_Signing(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !sig.VerifyByte(pub, root[:]) {
+	valid, err := sig.VerifyByte(pub, root[:])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !valid {
 		t.Fatal("bad signature")
 	}
 }
