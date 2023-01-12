@@ -2,6 +2,7 @@ name: Unit tests
 on: [push, pull_request]
 env:
   CGO_CFLAGS: "-O -D__BLST_PORTABLE__"
+  CGO_ENABLED: 1
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,3 +19,5 @@ jobs:
         run: ./scripts/openapi-mock.sh
       - name: Unit tests
         run: go test -v ./... -timeout 10m
+      - name: BLS Non-Cgo
+        run: CGO_ENABLED=0 go test -v ./bls/...

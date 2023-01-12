@@ -10,9 +10,9 @@ The core of this library was initially part of [eth2-validator](https://github.c
 
 **Http client**. Lightweight implementation for the [Beacon](https://ethereum.github.io/beacon-APIs) and [Builder](https://ethereum.github.io/builder-specs) OpenAPI spec. For usage and examples see the [Godoc](https://pkg.go.dev/github.com/umbracle/go-eth-consensus/http). The endpoints are tested against a real server that mocks the OpenAPI spec.
 
-**Chaintime**. Simple utilities to interact with slot times and epochs. 
+**Chaintime**. Simple utilities to interact with slot times and epochs.
 
-**BLS**. Abstraction to sign, recover and store (with keystore format) BLS keys.
+**BLS**. Abstraction to sign, recover and store (with keystore format) BLS keys. It includes two implementations: [blst](https://github.com/supranational/blst) with cgo and [kilic/bls12-381](https://github.com/kilic/bls12-381) with pure Go. The build flag `CGO_ENABLED` determines which library is used.
 
 ## Installation
 

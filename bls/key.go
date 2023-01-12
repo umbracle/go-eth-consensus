@@ -41,7 +41,10 @@ func (k *Key) PubKey() (out [48]byte) {
 }
 
 func (k *Key) Sign(root [32]byte) ([96]byte, error) {
-	signed := k.Prv.Sign(root[:])
+	signed, err := k.Prv.Sign(root[:])
+	if err != nil {
+		return [96]byte{}, err
+	}
 	return signed.Serialize(), nil
 }
 
