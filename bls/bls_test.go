@@ -139,3 +139,33 @@ func readBLSDir(t *testing.T, path string, ref interface{}, callback func(interf
 		callback(obj)
 	}
 }
+
+func BenchmarkBLS_Sign(b *testing.B) {
+	msg := []byte("msg")
+	priv := RandomKey()
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		priv.Sign(msg)
+	}
+}
+
+func BenchmarkBLS_Verify(b *testing.B) {
+	msg := []byte("msg")
+	priv := RandomKey()
+	pub := priv.GetPublicKey()
+
+	sign, err := priv.Sign(msg)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		sign.VerifyByte(pub, msg)
+	}
+}
