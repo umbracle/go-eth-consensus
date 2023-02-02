@@ -1,121 +1,30 @@
 package spec
 
 import (
-	"errors"
-	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"regexp"
-	"strings"
 	"testing"
 
-	ssz "github.com/ferranbt/fastssz"
-	"github.com/golang/snappy"
 	"github.com/stretchr/testify/require"
 	consensus "github.com/umbracle/go-eth-consensus"
 )
 
 func TestShuffle(t *testing.T) {
-	path := []string{"shuffling", "mapping.yaml"}
+	listTestData(t, "mainnet/phase0/shuffling/*/*/*", func(th *testHandler) {
+		shuffleTest := &shuffleTest{}
+		shuffleTest.Decode(th)
 
-	listTestData(t, path, func(th *testHandler) {
-		var test struct {
-			Seed    consensus.Root
-			Count   uint64
-			Mapping []uint64
-		}
-		th.decode(&test)
-
-		for i := uint64(0); i < test.Count; i++ {
-			index := ComputeShuffleIndex(i, test.Count, test.Seed)
-			require.Equal(t, test.Mapping[i], index)
+		for i := uint64(0); i < shuffleTest.Count; i++ {
+			index := ComputeShuffleIndex(i, shuffleTest.Count, shuffleTest.Seed)
+			require.Equal(t, shuffleTest.Mapping[i], index)
 		}
 	})
 }
 
-func listTestData(t *testing.T, paths []string, handlerFn func(tt *testHandler)) error {
-	folder := "../eth2.0-spec-tests/tests/mainnet"
-	regex := ".*\\/" + strings.Join(paths, "\\/.*\\/")
-
-	fmt.Println(regex)
-
-	r, err := regexp.Compile(regex)
-	require.NoError(t, err)
-
-	return filepath.Walk(folder, func(path string, info os.FileInfo, err error) error {
-		if !info.IsDir() {
-			return nil
-		}
-		if r.MatchString(path) {
-			handler := &testHandler{
-				t:    t,
-				path: path,
-			}
-			handlerFn(handler)
-		}
-		return nil
-	})
+type shuffleTest struct {
+	Seed    consensus.Root
+	Count   uint64
+	Mapping []uint64
 }
 
-type testHandler struct {
-	t    *testing.T
-	path string
-}
-
-func (th *testHandler) decodeFile(subPath string, obj interface{}) {
-	path := th.path
-	if subPath != "" {
-		path = filepath.Join(path, subPath)
-	}
-	var content []byte
-
-	ok, err := fileExists(path)
-	require.NoError(th.t, err)
-
-	if ok {
-		content, err = ioutil.ReadFile(path)
-		require.NoError(th.t, err)
-
-		err = ssz.UnmarshalSSZTest(content, obj)
-		require.NoError(th.t, err)
-	} else {
-		// try to read the file as ssz_snappy
-		snappyPath := path + ".ssz_snappy"
-
-		ok, err := fileExists(snappyPath)
-		require.NoError(th.t, err)
-
-		if !ok {
-			th.t.Fatalf("file %s not found (neither snappy)", subPath)
-		}
-
-		snappyContent, err := ioutil.ReadFile(snappyPath)
-		require.NoError(th.t, err)
-
-		content, err = snappy.Decode(nil, snappyContent)
-		require.NoError(th.t, err)
-
-		sszObj, ok := obj.(ssz.Unmarshaler)
-		if !ok {
-			th.t.Fatalf("obj '%s' is not ssz for snappy decompress", subPath)
-		}
-		err = sszObj.UnmarshalSSZ(content)
-		require.NoError(th.t, err)
-	}
-}
-
-func (th *testHandler) decode(obj interface{}) {
-	th.decodeFile("", obj)
-}
-
-func fileExists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return false, nil
-		}
-		return false, err
-	}
-	return true, nil
+func (s *shuffleTest) Decode(th *testHandler) {
+	th.decodeFile("mapping.yaml", &s)
 }

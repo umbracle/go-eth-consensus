@@ -30,6 +30,8 @@ type Spec struct {
 
 	SyncCommitteeSize uint64 `json:"SYNC_COMMITTEE_SIZE"`
 
+	ShardCommiteePeriod uint64 `json:"SHARD_COMMITTEE_PERIOD"`
+
 	// TargetAggregatorsPerCommittee defines the number of aggregators inside one committee.
 	TargetAggregatorsPerCommittee uint64 `json:"TARGET_AGGREGATORS_PER_COMMITTEE"`
 

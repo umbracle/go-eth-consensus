@@ -14,4 +14,5 @@ var Spec = &consensus.Spec{
 	BaseRewardFactor:             64,
 	BaseRewardsPerEpoch:          4,
 	TargetCommitteeSize:          128,
+	ShardCommiteePeriod:          256,
 }
