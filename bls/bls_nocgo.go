@@ -26,9 +26,6 @@ func (s *Signature) Deserialize(buf []byte) error {
 	if err != nil {
 		return err
 	}
-	if bls12381.NewG2().IsZero(g2) {
-		return fmt.Errorf("infinity")
-	}
 	s.sig = g2
 	return nil
 }
@@ -40,6 +37,10 @@ func (s *Signature) Serialize() (res [96]byte) {
 }
 
 func (s *Signature) VerifyByte(pub *PublicKey, msg []byte) (bool, error) {
+	return s.verifyImpl(pub.pub, msg)
+}
+
+func (s *Signature) verifyImpl(g1 *bls12381.PointG1, msg []byte) (bool, error) {
 	hash, err := bls12381.NewG2().HashToCurve(msg, domain)
 	if err != nil {
 		return false, err
@@ -47,9 +48,45 @@ func (s *Signature) VerifyByte(pub *PublicKey, msg []byte) (bool, error) {
 
 	e := bls12381.NewEngine()
 	e.AddPairInv(e.G1.One(), s.sig)
-	e.AddPair(pub.pub, hash)
+	e.AddPair(g1, hash)
 
 	return e.Check(), nil
+}
+
+func (s *Signature) FastAggregateVerify(pubKeys []*PublicKey, msg []byte) (bool, error) {
+	if bls12381.NewG2().IsZero(s.sig) {
+		// signature is infinite
+		return false, nil
+	}
+
+	// aggregate public keys
+	aggPub := new(bls12381.PointG1)
+	g1 := bls12381.NewG1()
+
+	for _, pub := range pubKeys {
+		aggPub = g1.Add(aggPub, aggPub, pub.pub)
+	}
+
+	ok, err := s.verifyImpl(aggPub, msg)
+	if err != nil {
+		return false, err
+	}
+	return ok, nil
+}
+
+func AggregateSignatures(sigs []*Signature) *Signature {
+	if len(sigs) == 0 {
+		return nil
+	}
+
+	aggSig := new(bls12381.PointG2)
+	g2 := bls12381.NewG2()
+
+	for _, sig := range sigs {
+		aggSig = g2.Add(aggSig, aggSig, sig.sig)
+	}
+
+	return &Signature{sig: aggSig}
 }
 
 // PublicKey is a Bls public key
