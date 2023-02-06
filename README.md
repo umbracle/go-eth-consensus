@@ -1,4 +1,7 @@
-# Go-eth-consensus [![Godoc](https://godoc.org/github.com/umbracle/go-eth-consensus?status.svg)](https://godoc.org/github.com/umbracle/go-eth-consensus)
+# Go-eth-consensus [![Godoc](https://godoc.org/github.com/umbracle/go-eth-consensus?status.svg)](https://godoc.org/github.com/umbracle/go-eth-consensus) [![Chat Badge]][chat link]
+
+[chat badge]: https://img.shields.io/badge/chat-discord-%237289da
+[chat link]: https://discord.gg/yCqYxwZNYD
 
 Go-eth-consensus is a suite of Go utilities to interact with the Ethereum consensus layer.
 
