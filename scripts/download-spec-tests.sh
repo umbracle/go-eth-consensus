@@ -20,4 +20,4 @@ download "general"
 
 # Download bls tests
 mkdir $REPO_NAME/bls
-wget https://github.com/ethereum/bls12-381-tests/releases/download/v0.1.0/bls_tests_json.tar.gz -O - | tar -xz -C eth2.0-spec-tests/bls
+wget https://github.com/ethereum/bls12-381-tests/releases/download/v0.1.2/bls_tests_json.tar.gz -O - | tar -xz -C eth2.0-spec-tests/bls
