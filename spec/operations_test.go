@@ -1,14 +1,13 @@
 package spec
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
 	consensus "github.com/umbracle/go-eth-consensus"
 )
 
-func TestAttestation(t *testing.T) {
+func TestOpAttestation(t *testing.T) {
 	type attestationTest struct {
 		Attestation consensus.Attestation
 		Pre         consensus.BeaconStatePhase0
@@ -19,13 +18,25 @@ func TestAttestation(t *testing.T) {
 		attestationTest := &attestationTest{}
 		th.decodeFile("attestation", &attestationTest.Attestation)
 		th.decodeFile("pre", &attestationTest.Pre)
-		th.decodeFile("post", &attestationTest.Post, true)
+		ok := th.decodeFile("post", &attestationTest.Post, true)
 
-		fmt.Println("x")
+		if err := ProcessAttestation(&attestationTest.Pre, &attestationTest.Attestation); err != nil {
+			if ok {
+				t.Fatal(err)
+			}
+			return
+		}
+
+		if !ok {
+			t.Fatal("it should fail")
+		}
+		if !reflect.DeepEqual(attestationTest.Pre, attestationTest.Post) {
+			t.Fatal("bad")
+		}
 	})
 }
 
-func TestProcessAttesterSlashing(t *testing.T) {
+func TestOpProcessAttesterSlashing(t *testing.T) {
 	type processAttesterSlashingTest struct {
 		Pre              consensus.BeaconStatePhase0
 		Post             consensus.BeaconStatePhase0
@@ -35,14 +46,26 @@ func TestProcessAttesterSlashing(t *testing.T) {
 	listTestData(t, "mainnet/phase0/operations/attester_slashing/*/*", func(th *testHandler) {
 		slashTest := &processAttesterSlashingTest{}
 		th.decodeFile("pre", &slashTest.Pre)
-		th.decodeFile("post", &slashTest.Post, true)
+		ok := th.decodeFile("post", &slashTest.Post, true)
 		th.decodeFile("attester_slashing", &slashTest.AttesterSlashing)
 
-		ProcessAttesterSlashing(&slashTest.Pre, &slashTest.AttesterSlashing)
+		if err := ProcessAttesterSlashing(&slashTest.Pre, &slashTest.AttesterSlashing); err != nil {
+			if ok {
+				t.Fatal(err)
+			}
+			return
+		}
+
+		if !ok {
+			t.Fatal("it should fail")
+		}
+		if !reflect.DeepEqual(slashTest.Pre, slashTest.Post) {
+			t.Fatal("bad")
+		}
 	})
 }
 
-func TestProcessBlockBlockHeader(t *testing.T) {
+func TestOpProcessBlockBlockHeader(t *testing.T) {
 	type blockHeaderTest struct {
 		Pre   consensus.BeaconStatePhase0
 		Post  consensus.BeaconStatePhase0
@@ -53,14 +76,26 @@ func TestProcessBlockBlockHeader(t *testing.T) {
 		blockHeaderTest := &blockHeaderTest{}
 		th.decodeFile("block", &blockHeaderTest.Block)
 		th.decodeFile("pre", &blockHeaderTest.Pre)
-		th.decodeFile("post", &blockHeaderTest.Post, true)
+		ok := th.decodeFile("post", &blockHeaderTest.Post, true)
 
-		ProcessBlockHeader(&blockHeaderTest.Pre, &blockHeaderTest.Block)
+		if err := ProcessBlockHeader(&blockHeaderTest.Pre, &blockHeaderTest.Block); err != nil {
+			if ok {
+				t.Fatal(err)
+			}
+			return
+		}
+
+		if !ok {
+			t.Fatal("it should fail")
+		}
+		if !reflect.DeepEqual(blockHeaderTest.Pre, blockHeaderTest.Post) {
+			t.Fatal("bad")
+		}
 	})
 
 }
 
-func TestDeposit(t *testing.T) {
+func TestOpDeposit(t *testing.T) {
 	type depositTest struct {
 		Deposit consensus.Deposit
 		Pre     consensus.BeaconStatePhase0
@@ -71,17 +106,25 @@ func TestDeposit(t *testing.T) {
 		depositTest := &depositTest{}
 		th.decodeFile("deposit", &depositTest.Deposit)
 		th.decodeFile("pre", &depositTest.Pre)
-		th.decodeFile("post", &depositTest.Post, true)
+		ok := th.decodeFile("post", &depositTest.Post, true)
 
-		ProcessDeposit(&depositTest.Pre, &depositTest.Deposit)
+		if err := ProcessDeposit(&depositTest.Pre, &depositTest.Deposit); err != nil {
+			if ok {
+				t.Fatal(err)
+			}
+			return
+		}
 
+		if !ok {
+			t.Fatal("it should fail")
+		}
 		if !reflect.DeepEqual(depositTest.Pre, depositTest.Post) {
 			t.Fatal("bad")
 		}
 	})
 }
 
-func TestProposerSlashing(t *testing.T) {
+func TestOpProposerSlashing(t *testing.T) {
 	type proposerSlashingTest struct {
 		ProposerSlashing consensus.ProposerSlashing
 		Pre              consensus.BeaconStatePhase0
@@ -92,13 +135,25 @@ func TestProposerSlashing(t *testing.T) {
 		proposerSlashingTest := &proposerSlashingTest{}
 		th.decodeFile("proposer_slashing", &proposerSlashingTest.ProposerSlashing)
 		th.decodeFile("pre", &proposerSlashingTest.Pre)
-		th.decodeFile("post", &proposerSlashingTest.Post, true)
+		ok := th.decodeFile("post", &proposerSlashingTest.Post, true)
 
-		ProcessProposerSlashing(&proposerSlashingTest.Pre, &proposerSlashingTest.ProposerSlashing)
+		if err := ProcessProposerSlashing(&proposerSlashingTest.Pre, &proposerSlashingTest.ProposerSlashing); err != nil {
+			if ok {
+				t.Fatal(err)
+			}
+			return
+		}
+
+		if !ok {
+			t.Fatal("it should fail")
+		}
+		if !reflect.DeepEqual(proposerSlashingTest.Pre, proposerSlashingTest.Post) {
+			t.Fatal("bad")
+		}
 	})
 }
 
-func TestVoluntaryExit(t *testing.T) {
+func TestOpVoluntaryExit(t *testing.T) {
 	type voluntaryExitTest struct {
 		VoluntaryExit consensus.SignedVoluntaryExit
 		Pre           consensus.BeaconStatePhase0
@@ -109,8 +164,20 @@ func TestVoluntaryExit(t *testing.T) {
 		voluntaryExitTest := &voluntaryExitTest{}
 		th.decodeFile("voluntary_exit", &voluntaryExitTest.VoluntaryExit)
 		th.decodeFile("pre", &voluntaryExitTest.Pre)
-		th.decodeFile("post", &voluntaryExitTest.Post, true)
+		ok := th.decodeFile("post", &voluntaryExitTest.Post, true)
 
-		ProcessVoluntaryExit(&voluntaryExitTest.Pre, &voluntaryExitTest.VoluntaryExit)
+		if err := ProcessVoluntaryExit(&voluntaryExitTest.Pre, &voluntaryExitTest.VoluntaryExit); err != nil {
+			if ok {
+				t.Fatal(err)
+			}
+			return
+		}
+
+		if !ok {
+			t.Fatal("it should fail")
+		}
+		if !reflect.DeepEqual(voluntaryExitTest.Pre, voluntaryExitTest.Post) {
+			t.Fatal("bad")
+		}
 	})
 }

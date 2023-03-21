@@ -108,7 +108,11 @@ func Verify(data *consensus.DepositData) error {
 		return err
 	}
 
-	if !sig.VerifyByte(pub, root[:]) {
+	ok, err := sig.VerifyByte(pub, root[:])
+	if err != nil {
+		return err
+	}
+	if !ok {
 		return fmt.Errorf("bad signature")
 	}
 

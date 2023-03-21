@@ -4,6 +4,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"strings"
+
+	ssz "github.com/ferranbt/fastssz"
 )
 
 type Domain [4]byte
@@ -47,6 +49,23 @@ func ComputeDomain(domain Domain, forkVersion [4]byte, genesisValidatorsRoot Roo
 		return [32]byte{}, err
 	}
 	return ToBytes32(append(domain[:], forkRoot[:28]...)), nil
+}
+
+func ComputeSigningRoot(domain [32]byte, obj ssz.HashRoot) ([32]byte, error) {
+	unsignedMsgRoot, err := obj.HashTreeRoot()
+	if err != nil {
+		return [32]byte{}, err
+	}
+
+	root, err := ssz.HashWithDefaultHasher(&SigningData{
+		ObjectRoot: unsignedMsgRoot,
+		Domain:     domain,
+	})
+	if err != nil {
+		return [32]byte{}, err
+	}
+
+	return root, nil
 }
 
 type DomainType Domain

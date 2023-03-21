@@ -13,7 +13,7 @@ func TestShuffle(t *testing.T) {
 		shuffleTest.Decode(th)
 
 		for i := uint64(0); i < shuffleTest.Count; i++ {
-			index := ComputeShuffleIndex(i, shuffleTest.Count, shuffleTest.Seed)
+			index := computeShuffleIndex(i, shuffleTest.Count, shuffleTest.Seed)
 			require.Equal(t, shuffleTest.Mapping[i], index)
 		}
 	})

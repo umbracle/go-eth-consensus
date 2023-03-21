@@ -8,6 +8,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/kilic/bls12-381 v0.1.0
 	github.com/mitchellh/mapstructure v1.3.2
+	github.com/protolambda/eth2-shuffle v1.1.0
 	github.com/r3labs/sse v0.0.0-20210224172625-26fe804710bc
 	github.com/stretchr/testify v1.8.0
 	github.com/supranational/blst v0.3.10

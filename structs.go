@@ -88,6 +88,11 @@ type SignedVoluntaryExit struct {
 	Signature Signature      `json:"signature" ssz-size:"96"`
 }
 
+type HistoricalBatch struct {
+	BlockRoots [8192][32]byte `json:"block_roots" ssz-size:"8192,32"`
+	StateRoots [8192][32]byte `json:"state_roots" ssz-size:"8192,32"`
+}
+
 type Eth1Data struct {
 	DepositRoot  Root     `json:"deposit_root" ssz-size:"32"`
 	DepositCount uint64   `json:"deposit_count"`

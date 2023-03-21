@@ -1,49 +1,41 @@
 package spec
 
 import (
-	"fmt"
+	"reflect"
 	"testing"
 
 	consensus "github.com/umbracle/go-eth-consensus"
 )
 
-/*
-func TestOperationsX(t *testing.T) {
-	th := &testHandler{
-		path: "../eth2.0-spec-tests/tests/mainnet/phase0/operations/attestation/pyspec_tests/after_epoch_slots",
-	}
-
-	test := &opAttestationTest{
-		Pre:         &consensus.BeaconStatePhase0{},
-		Attestation: &consensus.Attestation{},
-	}
-	th.decodeFile(t, "attestation", test.Attestation)
-	th.decodeFile(t, "pre", test.Pre)
-}
-
-type opAttestationTest struct {
-	Pre         *consensus.BeaconStatePhase0
-	Attestation *consensus.Attestation
-}
-*/
+type rewardFunc func(state *consensus.BeaconStatePhase0) ([]uint64, []uint64)
 
 func TestRewards(t *testing.T) {
-	th := &testHandler{
-		t:    t,
-		path: "../eth2.0-spec-tests/tests/mainnet/phase0/rewards/basic/pyspec_tests/full_all_correct",
-	}
-	/*
-		listTestData(path, func(th *testHandler) {
-			fmt.Println(th.path)
-		})
-	*/
+	listTestData(t, "mainnet/phase0/rewards/basic/pyspec_tests/*", func(th *testHandler) {
+		test := &specRewardTest{}
+		test.Decode(th)
 
-	test := &specRewardTest{}
-	test.Decode(th)
+		cases := []struct {
+			name  string
+			fn    rewardFunc
+			delta Deltas
+		}{
+			{"source", getSourceDeltas, test.SourceDeltas},
+			{"target", getTargetDeltas, test.TargetDeltas},
+			{"head", getHeadDeltas, test.HeadDeltas},
+			{"inactivity", getInactivityPenaltyDeltas, test.InactivityPenaltyDeltas},
+		}
 
-	fmt.Println(getSourceDeltas(&test.Pre))
+		for _, c := range cases {
+			rewards, penalties := c.fn(&test.Pre)
 
-	fmt.Println(test.SourceDeltas)
+			if !reflect.DeepEqual(rewards, c.delta.Rewards) {
+				t.Fatalf("bad '%s' rewards: %s", c.name, th.path)
+			}
+			if !reflect.DeepEqual(penalties, c.delta.Penalties) {
+				t.Fatalf("bad '%s' penalties: %s", c.name, th.path)
+			}
+		}
+	})
 }
 
 type specRewardTest struct {
@@ -59,5 +51,5 @@ func (s *specRewardTest) Decode(th *testHandler) {
 	th.decodeFile("head_deltas", &s.HeadDeltas)
 	th.decodeFile("inactivity_penalty_deltas", &s.InactivityPenaltyDeltas)
 	th.decodeFile("source_deltas", &s.SourceDeltas)
-	th.decodeFile("target_deltas", &s.SourceDeltas)
+	th.decodeFile("target_deltas", &s.TargetDeltas)
 }

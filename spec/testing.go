@@ -40,7 +40,7 @@ type testHandler struct {
 	path string
 }
 
-func (th *testHandler) decodeFile(subPath string, obj interface{}, maybeEmpty ...bool) {
+func (th *testHandler) decodeFile(subPath string, obj interface{}, maybeEmpty ...bool) bool {
 	path := filepath.Join(th.path, subPath)
 	var content []byte
 
@@ -63,7 +63,7 @@ func (th *testHandler) decodeFile(subPath string, obj interface{}, maybeEmpty ..
 		if !ok {
 			if len(maybeEmpty) != 0 && maybeEmpty[0] {
 				// the file might not exist
-				return
+				return false
 			}
 			th.t.Fatalf("file '%s' not found (neither snappy)", subPath)
 		}
@@ -81,6 +81,8 @@ func (th *testHandler) decodeFile(subPath string, obj interface{}, maybeEmpty ..
 		err = sszObj.UnmarshalSSZ(content)
 		require.NoError(th.t, err)
 	}
+
+	return true
 }
 
 func fileExists(path string) (bool, error) {

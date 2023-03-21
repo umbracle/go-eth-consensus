@@ -47,6 +47,7 @@ var codecs = map[string]testCallback{
 	"LightClientFinalityUpdate":   func(f fork) codec { return new(LightClientFinalityUpdate) },
 	"LightClientOptimisticUpdate": func(f fork) codec { return new(LightClientOptimisticUpdate) },
 	"LightClientUpdate":           func(f fork) codec { return new(LightClientUpdate) },
+	"HistoricalBatch":             func(f fork) codec { return new(HistoricalBatch) },
 	"BeaconBlock": func(f fork) codec {
 		if f == capellaFork {
 			return new(BeaconBlockCapella)
