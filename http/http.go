@@ -117,6 +117,11 @@ var httpErrorMapping = map[int]error{
 	http.StatusServiceUnavailable:  ErrorServiceUnavailable,
 }
 
+type httpErrorMessage struct {
+	Code    uint64 `json:"code"`
+	Message string `json:"message"`
+}
+
 func (c *Client) decodeResp(resp *http.Response, out interface{}) error {
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -124,11 +129,19 @@ func (c *Client) decodeResp(resp *http.Response, out interface{}) error {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		errorMsg, ok := httpErrorMapping[resp.StatusCode]
-		if ok {
-			return errorMsg
+		// decode the error message
+		var msg httpErrorMessage
+		if err := json.Unmarshal(data, &msg); err != nil {
+			return err
 		}
-		return fmt.Errorf("status code != 200: %s %d", string(data), resp.StatusCode)
+
+		errorMsgCode, ok := httpErrorMapping[resp.StatusCode]
+		if ok {
+			return fmt.Errorf("%w: %v", errorMsgCode, msg.Message)
+		}
+
+		// return the error message as is
+		return fmt.Errorf(msg.Message)
 	}
 
 	c.config.logger.Printf("[TRACE] Http response: data, %s", string(data))
