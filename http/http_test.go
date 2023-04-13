@@ -38,7 +38,9 @@ func TestHttp_Post(t *testing.T) {
 func TestHttp_ErrorStatus(t *testing.T) {
 	handler := func(m *http.ServeMux) {
 		m.HandleFunc("/do", func(w http.ResponseWriter, r *http.Request) {
-			switch r.URL.Query().Get("t") {
+			errorCode := r.URL.Query().Get("t")
+
+			switch errorCode {
 			case "400":
 				w.WriteHeader(http.StatusBadRequest)
 			case "404":
@@ -48,6 +50,8 @@ func TestHttp_ErrorStatus(t *testing.T) {
 			case "503":
 				w.WriteHeader(http.StatusServiceUnavailable)
 			}
+
+			w.Write([]byte(`{"message": "incorrect data", "code": ` + errorCode + `}`))
 		})
 	}
 
