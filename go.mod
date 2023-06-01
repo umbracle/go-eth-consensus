@@ -3,14 +3,14 @@ module github.com/umbracle/go-eth-consensus
 go 1.18
 
 require (
-	github.com/ferranbt/fastssz v0.1.1
+	github.com/ferranbt/fastssz v0.1.3
 	github.com/golang/snappy v0.0.3
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/kilic/bls12-381 v0.1.0
 	github.com/mitchellh/mapstructure v1.3.2
 	github.com/protolambda/eth2-shuffle v1.1.0
 	github.com/r3labs/sse v0.0.0-20210224172625-26fe804710bc
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	github.com/supranational/blst v0.3.10
 	github.com/umbracle/ethgo v0.1.3
 	gopkg.in/yaml.v2 v2.3.0
@@ -32,9 +32,10 @@ require (
 	github.com/gorilla/websocket v1.4.1 // indirect
 	github.com/klauspost/compress v1.4.1 // indirect
 	github.com/klauspost/cpuid v1.2.0 // indirect
+	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/minio/sha256-simd v0.1.1 // indirect
+	github.com/minio/sha256-simd v1.0.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/opencontainers/runc v0.1.1 // indirect
