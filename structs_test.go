@@ -38,16 +38,42 @@ const (
 type testCallback func(f fork) codec
 
 var codecs = map[string]testCallback{
-	"AttestationData":             func(f fork) codec { return new(AttestationData) },
-	"Checkpoint":                  func(f fork) codec { return new(Checkpoint) },
-	"AggregateAndProof":           func(f fork) codec { return new(AggregateAndProof) },
-	"Attestation":                 func(f fork) codec { return new(Attestation) },
-	"AttesterSlashing":            func(f fork) codec { return new(AttesterSlashing) },
-	"LightClientBootstrap":        func(f fork) codec { return new(LightClientBootstrap) },
-	"LightClientFinalityUpdate":   func(f fork) codec { return new(LightClientFinalityUpdate) },
-	"LightClientOptimisticUpdate": func(f fork) codec { return new(LightClientOptimisticUpdate) },
-	"LightClientUpdate":           func(f fork) codec { return new(LightClientUpdate) },
-	"HistoricalBatch":             func(f fork) codec { return new(HistoricalBatch) },
+	"AttestationData":   func(f fork) codec { return new(AttestationData) },
+	"Checkpoint":        func(f fork) codec { return new(Checkpoint) },
+	"AggregateAndProof": func(f fork) codec { return new(AggregateAndProof) },
+	"Attestation":       func(f fork) codec { return new(Attestation) },
+	"AttesterSlashing":  func(f fork) codec { return new(AttesterSlashing) },
+	"LightClientHeader": func(f fork) codec {
+		if f == capellaFork {
+			return new(LightClientHeaderCapella)
+		}
+		return new(LightClientHeader)
+	},
+	"LightClientBootstrap": func(f fork) codec {
+		if f == capellaFork {
+			return new(LightClientBootstrapCapella)
+		}
+		return new(LightClientBootstrap)
+	},
+	"LightClientFinalityUpdate": func(f fork) codec {
+		if f == capellaFork {
+			return new(LightClientFinalityUpdateCapella)
+		}
+		return new(LightClientFinalityUpdate)
+	},
+	"LightClientOptimisticUpdate": func(f fork) codec {
+		if f == capellaFork {
+			return new(LightClientOptimisticUpdateCapella)
+		}
+		return new(LightClientOptimisticUpdate)
+	},
+	"LightClientUpdate": func(f fork) codec {
+		if f == capellaFork {
+			return new(LightClientUpdateCapella)
+		}
+		return new(LightClientUpdate)
+	},
+	"HistoricalBatch": func(f fork) codec { return new(HistoricalBatch) },
 	"BeaconBlock": func(f fork) codec {
 		if f == capellaFork {
 			return new(BeaconBlockCapella)
