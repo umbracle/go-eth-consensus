@@ -197,31 +197,35 @@ type SigningData struct {
 
 // Altair fork
 
+type LightClientHeader struct {
+	Header *BeaconBlockHeader `json:"beacon"`
+}
+
 type LightClientBootstrap struct {
-	Header                     *BeaconBlockHeader `json:"header"`
+	Header                     *LightClientHeader `json:"header"`
 	CurrentSyncCommittee       *SyncCommittee     `json:"current_sync_committee"`
 	CurrentSyncCommitteeBranch [][32]byte         `json:"current_sync_committee_branch" ssz-size:"5,32"`
 }
 
 type LightClientFinalityUpdate struct {
-	AttestedHeader  *BeaconBlockHeader `json:"attested_header"`
-	FinalizedHeader *BeaconBlockHeader `json:"finalized_header"`
+	AttestedHeader  *LightClientHeader `json:"attested_header"`
+	FinalizedHeader *LightClientHeader `json:"finalized_header"`
 	FinalityBranch  [][32]byte         `json:"finality_branch" ssz-size:"6,32"`
 	SyncAggregate   *SyncAggregate     `json:"sync_aggregate"`
 	SignatureSlot   uint64             `json:"signature_slot"`
 }
 
 type LightClientOptimisticUpdate struct {
-	AttestedHeader *BeaconBlockHeader `json:"attested_header"`
+	AttestedHeader *LightClientHeader `json:"attested_header"`
 	SyncAggregate  *SyncAggregate     `json:"sync_aggregate"`
 	SignatureSlot  uint64             `json:"signature_slot"`
 }
 
 type LightClientUpdate struct {
-	AttestedHeader          *BeaconBlockHeader `json:"attested_header"`
+	AttestedHeader          *LightClientHeader `json:"attested_header"`
 	NextSyncCommittee       *SyncCommittee     `json:"next_sync_committee"`
 	NextSyncCommitteeBranch [][32]byte         `json:"next_sync_committee_branch" ssz-size:"5,32"`
-	FinalizedHeader         *BeaconBlockHeader `json:"finalized_header"`
+	FinalizedHeader         *LightClientHeader `json:"finalized_header"`
 	FinalityBranch          [][32]byte         `json:"finality_branch" ssz-size:"6,32"`
 	SyncAggregate           *SyncAggregate     `json:"sync_aggregate"`
 	SignatureSlot           uint64             `json:"signature_slot"`
@@ -573,4 +577,40 @@ type BeaconBlockBodyCapella struct {
 	SyncAggregate         *SyncAggregate                `json:"sync_aggregate"`
 	ExecutionPayload      *ExecutionPayloadCapella      `json:"execution_payload"`
 	BlsToExecutionChanges []*SignedBLSToExecutionChange `json:"bls_to_execution_changes" ssz-max:"16"`
+}
+
+type LightClientHeaderCapella struct {
+	Header          *BeaconBlockHeader             `json:"beacon"`
+	Execution       *ExecutionPayloadHeaderCapella `json:"execution"`
+	ExecutionBranch [4][32]byte                    `json:"execution_branch" ssz-size:"4,32"`
+}
+
+type LightClientBootstrapCapella struct {
+	Header                     *LightClientHeaderCapella `json:"header"`
+	CurrentSyncCommittee       *SyncCommittee            `json:"current_sync_committee"`
+	CurrentSyncCommitteeBranch [][32]byte                `json:"current_sync_committee_branch" ssz-size:"5,32"`
+}
+
+type LightClientFinalityUpdateCapella struct {
+	AttestedHeader  *LightClientHeaderCapella `json:"attested_header"`
+	FinalizedHeader *LightClientHeaderCapella `json:"finalized_header"`
+	FinalityBranch  [][32]byte                `json:"finality_branch" ssz-size:"6,32"`
+	SyncAggregate   *SyncAggregate            `json:"sync_aggregate"`
+	SignatureSlot   uint64                    `json:"signature_slot"`
+}
+
+type LightClientOptimisticUpdateCapella struct {
+	AttestedHeader *LightClientHeaderCapella `json:"attested_header"`
+	SyncAggregate  *SyncAggregate            `json:"sync_aggregate"`
+	SignatureSlot  uint64                    `json:"signature_slot"`
+}
+
+type LightClientUpdateCapella struct {
+	AttestedHeader          *LightClientHeaderCapella `json:"attested_header"`
+	NextSyncCommittee       *SyncCommittee            `json:"next_sync_committee"`
+	NextSyncCommitteeBranch [][32]byte                `json:"next_sync_committee_branch" ssz-size:"5,32"`
+	FinalizedHeader         *LightClientHeaderCapella `json:"finalized_header"`
+	FinalityBranch          [][32]byte                `json:"finality_branch" ssz-size:"6,32"`
+	SyncAggregate           *SyncAggregate            `json:"sync_aggregate"`
+	SignatureSlot           uint64                    `json:"signature_slot"`
 }
