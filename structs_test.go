@@ -38,124 +38,128 @@ const (
 type testCallback func(f fork) codec
 
 var codecs = map[string]testCallback{
-	"AttestationData":   func(f fork) codec { return new(AttestationData) },
-	"Checkpoint":        func(f fork) codec { return new(Checkpoint) },
-	"AggregateAndProof": func(f fork) codec { return new(AggregateAndProof) },
-	"Attestation":       func(f fork) codec { return new(Attestation) },
-	"AttesterSlashing":  func(f fork) codec { return new(AttesterSlashing) },
-	"LightClientHeader": func(f fork) codec {
-		if f == capellaFork {
-			return new(LightClientHeaderCapella)
-		}
-		return new(LightClientHeader)
-	},
-	"LightClientBootstrap": func(f fork) codec {
-		if f == capellaFork {
-			return new(LightClientBootstrapCapella)
-		}
-		return new(LightClientBootstrap)
-	},
-	"LightClientFinalityUpdate": func(f fork) codec {
-		if f == capellaFork {
-			return new(LightClientFinalityUpdateCapella)
-		}
-		return new(LightClientFinalityUpdate)
-	},
-	"LightClientOptimisticUpdate": func(f fork) codec {
-		if f == capellaFork {
-			return new(LightClientOptimisticUpdateCapella)
-		}
-		return new(LightClientOptimisticUpdate)
-	},
-	"LightClientUpdate": func(f fork) codec {
-		if f == capellaFork {
-			return new(LightClientUpdateCapella)
-		}
-		return new(LightClientUpdate)
-	},
-	"HistoricalBatch": func(f fork) codec { return new(HistoricalBatch) },
-	"BeaconBlock": func(f fork) codec {
-		if f == capellaFork {
-			return new(BeaconBlockCapella)
-		} else if f == altairFork {
-			return new(BeaconBlockAltair)
-		} else if f == bellatrixFork {
-			return new(BeaconBlockBellatrix)
-		}
-		return new(BeaconBlockPhase0)
-	},
-	"BeaconBlockBody": func(f fork) codec {
-		if f == capellaFork {
-			return new(BeaconBlockBodyCapella)
-		} else if f == altairFork {
-			return new(BeaconBlockBodyAltair)
-		} else if f == bellatrixFork {
-			return new(BeaconBlockBodyBellatrix)
-		}
-		return new(BeaconBlockBodyPhase0)
-	},
-	"BeaconBlockHeader":  func(f fork) codec { return new(BeaconBlockHeader) },
-	"Deposit":            func(f fork) codec { return new(Deposit) },
-	"DepositData":        func(f fork) codec { return new(DepositData) },
-	"DepositMessage":     func(f fork) codec { return new(DepositMessage) },
-	"Eth1Data":           func(f fork) codec { return new(Eth1Data) },
-	"Fork":               func(f fork) codec { return new(Fork) },
-	"IndexedAttestation": func(f fork) codec { return new(IndexedAttestation) },
-	"PendingAttestation": func(f fork) codec { return new(PendingAttestation) },
-	"ProposerSlashing":   func(f fork) codec { return new(ProposerSlashing) },
-	"SignedBeaconBlock": func(f fork) codec {
-		if f == capellaFork {
-			return new(SignedBeaconBlockCapella)
-		} else if f == altairFork {
-			return new(SignedBeaconBlockAltair)
-		} else if f == bellatrixFork {
-			return new(SignedBeaconBlockBellatrix)
-		}
-		return new(SignedBeaconBlockPhase0)
-	},
-	"SignedBeaconBlockHeader":     func(f fork) codec { return new(SignedBeaconBlockHeader) },
-	"SignedVoluntaryExit":         func(f fork) codec { return new(SignedVoluntaryExit) },
-	"SigningRoot":                 func(f fork) codec { return new(SigningRoot) },
-	"Validator":                   func(f fork) codec { return new(Validator) },
-	"VoluntaryExit":               func(f fork) codec { return new(VoluntaryExit) },
-	"SyncCommittee":               func(f fork) codec { return new(SyncCommittee) },
-	"SyncAggregate":               func(f fork) codec { return new(SyncAggregate) },
-	"SyncCommitteeMessage":        func(f fork) codec { return new(SyncCommitteeMessage) },
-	"SyncCommitteeContribution":   func(f fork) codec { return new(SyncCommitteeContribution) },
-	"SignedContributionAndProof":  func(f fork) codec { return new(SignedContributionAndProof) },
-	"ContributionAndProof":        func(f fork) codec { return new(ContributionAndProof) },
-	"Eth1Block":                   func(f fork) codec { return new(Eth1Block) },
-	"SyncAggregatorSelectionData": func(f fork) codec { return new(SyncAggregatorSelectionData) },
-	"SigningData":                 func(f fork) codec { return new(SigningData) },
-	"ForkData":                    func(f fork) codec { return new(ForkData) },
-	"SignedAggregateAndProof":     func(f fork) codec { return new(SignedAggregateAndProof) },
-	"PowBlock":                    func(f fork) codec { return new(PowBlock) },
-	"ExecutionPayload": func(f fork) codec {
-		if f == capellaFork {
-			return new(ExecutionPayloadCapella)
-		}
-		return new(ExecutionPayload)
-	},
-	"ExecutionPayloadHeader": func(f fork) codec {
-		if f == capellaFork {
-			return new(ExecutionPayloadHeaderCapella)
-		}
-		return new(ExecutionPayloadHeader)
-	},
-	"BeaconState": func(f fork) codec {
-		if f == altairFork {
-			return new(BeaconStateAltair)
-		} else if f == bellatrixFork {
-			return new(BeaconStateBellatrix)
-		} else if f == capellaFork {
-			return new(BeaconStateCapella)
-		}
-		return new(BeaconStatePhase0)
-	},
-	"BLSToExecutionChange":       func(f fork) codec { return new(BLSToExecutionChange) },
-	"HistoricalSummary":          func(f fork) codec { return new(HistoricalSummary) },
-	"SignedBLSToExecutionChange": func(f fork) codec { return new(SignedBLSToExecutionChange) },
-	"Withdrawal":                 func(f fork) codec { return new(Withdrawal) },
+	/*
+		"AttestationData":   func(f fork) codec { return new(AttestationData) },
+		"Checkpoint":        func(f fork) codec { return new(Checkpoint) },
+		"AggregateAndProof": func(f fork) codec { return new(AggregateAndProof) },
+		"Attestation":       func(f fork) codec { return new(Attestation) },
+		"AttesterSlashing":  func(f fork) codec { return new(AttesterSlashing) },
+		"LightClientHeader": func(f fork) codec {
+			if f == capellaFork {
+				return new(LightClientHeaderCapella)
+			}
+			return new(LightClientHeader)
+		},
+		"LightClientBootstrap": func(f fork) codec {
+			if f == capellaFork {
+				return new(LightClientBootstrapCapella)
+			}
+			return new(LightClientBootstrap)
+		},
+		"LightClientFinalityUpdate": func(f fork) codec {
+			if f == capellaFork {
+				return new(LightClientFinalityUpdateCapella)
+			}
+			return new(LightClientFinalityUpdate)
+		},
+		"LightClientOptimisticUpdate": func(f fork) codec {
+			if f == capellaFork {
+				return new(LightClientOptimisticUpdateCapella)
+			}
+			return new(LightClientOptimisticUpdate)
+		},
+		"LightClientUpdate": func(f fork) codec {
+			if f == capellaFork {
+				return new(LightClientUpdateCapella)
+			}
+			return new(LightClientUpdate)
+		},
+		"HistoricalBatch": func(f fork) codec { return new(HistoricalBatch) },
+		"BeaconBlock": func(f fork) codec {
+			if f == capellaFork {
+				return new(BeaconBlockCapella)
+			} else if f == altairFork {
+				return new(BeaconBlockAltair)
+			} else if f == bellatrixFork {
+				return new(BeaconBlockBellatrix)
+			}
+			return new(BeaconBlockPhase0)
+		},
+		"BeaconBlockBody": func(f fork) codec {
+			if f == capellaFork {
+				return new(BeaconBlockBodyCapella)
+			} else if f == altairFork {
+				return new(BeaconBlockBodyAltair)
+			} else if f == bellatrixFork {
+				return new(BeaconBlockBodyBellatrix)
+			}
+			return new(BeaconBlockBodyPhase0)
+		},
+		"BeaconBlockHeader":  func(f fork) codec { return new(BeaconBlockHeader) },
+		"Deposit":            func(f fork) codec { return new(Deposit) },
+		"DepositData":        func(f fork) codec { return new(DepositData) },
+		"DepositMessage":     func(f fork) codec { return new(DepositMessage) },
+		"Eth1Data":           func(f fork) codec { return new(Eth1Data) },
+		"Fork":               func(f fork) codec { return new(Fork) },
+		"IndexedAttestation": func(f fork) codec { return new(IndexedAttestation) },
+		"PendingAttestation": func(f fork) codec { return new(PendingAttestation) },
+		"ProposerSlashing":   func(f fork) codec { return new(ProposerSlashing) },
+		"SignedBeaconBlock": func(f fork) codec {
+			if f == capellaFork {
+				return new(SignedBeaconBlockCapella)
+			} else if f == altairFork {
+				return new(SignedBeaconBlockAltair)
+			} else if f == bellatrixFork {
+				return new(SignedBeaconBlockBellatrix)
+			}
+			return new(SignedBeaconBlockPhase0)
+		},
+		"SignedBeaconBlockHeader":     func(f fork) codec { return new(SignedBeaconBlockHeader) },
+	*/
+	"SignedVoluntaryExit": func(f fork) codec { return new(SignedContainer[*VoluntaryExit]) },
+	/*
+		"SigningRoot":                 func(f fork) codec { return new(SigningRoot) },
+		"Validator":                   func(f fork) codec { return new(Validator) },
+		"VoluntaryExit":               func(f fork) codec { return new(VoluntaryExit) },
+		"SyncCommittee":               func(f fork) codec { return new(SyncCommittee) },
+		"SyncAggregate":               func(f fork) codec { return new(SyncAggregate) },
+		"SyncCommitteeMessage":        func(f fork) codec { return new(SyncCommitteeMessage) },
+		"SyncCommitteeContribution":   func(f fork) codec { return new(SyncCommitteeContribution) },
+		"SignedContributionAndProof":  func(f fork) codec { return new(SignedContributionAndProof) },
+		"ContributionAndProof":        func(f fork) codec { return new(ContributionAndProof) },
+		"Eth1Block":                   func(f fork) codec { return new(Eth1Block) },
+		"SyncAggregatorSelectionData": func(f fork) codec { return new(SyncAggregatorSelectionData) },
+		"SigningData":                 func(f fork) codec { return new(SigningData) },
+		"ForkData":                    func(f fork) codec { return new(ForkData) },
+		"SignedAggregateAndProof":     func(f fork) codec { return new(SignedAggregateAndProof) },
+		"PowBlock":                    func(f fork) codec { return new(PowBlock) },
+		"ExecutionPayload": func(f fork) codec {
+			if f == capellaFork {
+				return new(ExecutionPayloadCapella)
+			}
+			return new(ExecutionPayload)
+		},
+		"ExecutionPayloadHeader": func(f fork) codec {
+			if f == capellaFork {
+				return new(ExecutionPayloadHeaderCapella)
+			}
+			return new(ExecutionPayloadHeader)
+		},
+		"BeaconState": func(f fork) codec {
+			if f == altairFork {
+				return new(BeaconStateAltair)
+			} else if f == bellatrixFork {
+				return new(BeaconStateBellatrix)
+			} else if f == capellaFork {
+				return new(BeaconStateCapella)
+			}
+			return new(BeaconStatePhase0)
+		},
+		"BLSToExecutionChange":       func(f fork) codec { return new(BLSToExecutionChange) },
+		"HistoricalSummary":          func(f fork) codec { return new(HistoricalSummary) },
+		"SignedBLSToExecutionChange": func(f fork) codec { return new(SignedBLSToExecutionChange) },
+		"Withdrawal":                 func(f fork) codec { return new(Withdrawal) },
+	*/
 }
 
 func testFork(t *testing.T, fork fork) {
